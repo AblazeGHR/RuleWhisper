@@ -1,89 +1,113 @@
-# Hy3 怪物数据提取
+# P9 — 规则版本管理
 
-## 任务
+## 目标
 
-从规则书第十四章提取所有怪物数据，输出 `data/monsters.json`。
+基于 `data/rules/`、`data/weapons.json`、`data/monsters.json`、`data/spells.json` 实现规则集的版本管理。KP 可以创建房规版本、修改规则、比较差异、导出分享。
 
-## 源文件
+## 产出文件
 
-- `data/守秘人规则书.txt` — 规则书全文（1.5MB）
-- `data/ch14_raw.txt` — 已提取的第十四章原始文本（101KB）
-
-## 第十四章结构
-
-| 小节 | 内容 | 数量 |
-|------|------|------|
-| 14.1 神话生物 | 异形怪物（拜亚基/空鬼/古老者…） | ~30 |
-| 14.2 神话神灵 | 旧日支配者/外神（克苏鲁/奈亚…） | ~10 |
-| 14.3 经典怪物 | 恐怖经典（木乃伊/吸血鬼/狼人…） | ~6 |
-| 14.4 野兽 | 普通动物（蝙蝠/熊/鳄鱼…） | ~12 |
-
-注：具体数量以实际提取为准。
-
-## 输出格式
-
-每个怪物一条 JSON：
-
-```json
-{
-  "id": "byakhee",
-  "名称": "拜亚基",
-  "别名": "星骏",
-  "分类": "神话生物",
-  "属性": {"STR": 90, "CON": 50, "SIZ": 90, "DEX": 67, "INT": 50, "POW": 50},
-  "掷骰": {"STR": "5D6×5", "CON": "3D6×5"},
-  "HP": 14,
-  "伤害加值": "1D6",
-  "体格": 2,
-  "魔法值": 10,
-  "移动": "5/16 飞行",
-  "每回合攻击": "2次",
-  "战斗方式": "爪子攻击或撞击",
-  "格斗": 55,
-  "格斗_伤害": "1D6+DB",
-  "闪避": 33,
-  "护甲": "2 毛发与坚韧兽皮",
-  "理智损失": "1/1D6",
-  "技能": "聆听50%，侦查50%",
-  "法术": "有40%几率知晓1D4种法术",
-  "特殊能力": ["飞行：携带骑乘者穿越宇宙"],
-  "来源章节": "第十四章 怪物、野兽和神话诸神"
-}
+```
+src/engine/versioning.py     ← 版本管理核心
+data/versions/               ← 各版本数据存储目录
+data/versions/v1.0/          ← 默认七版规则（只读基线）
+data/versions/v2.0/          ← 第一批房规版本（示例）
 ```
 
-## 执行方法
+## 核心功能
 
-**重要：不要用正则/Python 脚本提取。** 已有的 monsters.json（正则提取）存在名称截断、括号拆散、野兽遗漏等问题。本次必须：
+### 1. 版本创建
 
-1. **用 Read 工具读取 `data/ch14_raw.txt`**（每次 250-400 行），直接理解文本并写出 JSON
-2. 每个怪物写入临时文件，用下方的 Python 脚本去重合并入 `data/monsters.json`
-3. 每完成一个子章节 commit 一次
-4. commit 前校验：`python -c "import json;json.load(open('data/monsters.json','utf-8'))"`
-
-Python 合并脚本：
 ```python
-import json
-base = json.load(open('data/monsters.json', encoding='utf-8'))  # 如果文件不存在，base = []
-new  = json.load(open('_temp.json', encoding='utf-8'))
-ids  = [x['id'] for x in base]
-merged = base + [x for x in new if x['id'] not in ids]
-json.dump(merged, open('data/monsters.json','w',encoding='utf-8'), ensure_ascii=False, indent=2)
+# 从默认规则创建新版本
+create_version("v2.0", "我的模组房规", based_on="v1.0")
+# → 复制 v1.0 全部数据 → v2.0/
 ```
 
-## 注意事项
+### 2. 规则修改
 
-**不要依赖已有的 `data/monsters.json`（如果存在）。** 该文件来自正则提取，存在以下已知问题：
+```python
+# 修改某条规则
+modify_rule("v2.0", "weapons", {"名称": "12号泵动式霰弹枪"}, {"时代": "禁用"})
+# → v2.0 的 weapons.json 中更新该条
 
-- 怪物名称被截断（如 "20号双管霰弹枪" → "号双管…"）
-- 多行名称中的括号被拆散（如 "包革金属棒（大头棍）" 被拆为两条）
-- 野兽章节格式识别错误（名称被描述文本替代）
-- 部分实体完全丢失（深潜者等）
+# 删除某条规则
+remove_rule("v2.0", "monsters", {"名称": "修格斯"})
+# → v2.0 的 monsters.json 中移除修格斯
 
-**请从 `data/ch14_raw.txt` 原始文本从头逐行检查提取，不参考旧文件。**
+# 新增自定义规则
+add_rule("v2.0", "weapons", {"名称": "激光步枪", "伤害": "4D10", ...})
+```
 
-格式注意事项：
-- `分类` 据小节判断，神灵为 "神话神灵"
-- 神灵常无掷骰（只有固定值），省略 `掷骰` 字段
-- 多形态怪物单独条目（如 修格斯 / 修格斯形态）
-- 野兽章节不总是 "Name，Title" 格式，名称直接从行首取
-- 保留原文标点（·、—、～等），不要转换
+### 3. 版本切换
+
+```python
+# 查询时指定版本
+query_weapons("霰弹枪", version="v2.0")
+# → v2.0 的结果中不包含被禁用的武器
+
+# 全局切换默认版本
+set_default_version("v2.0")
+# → 后续所有查询默认使用 v2.0
+```
+
+### 4. 版本比较
+
+```python
+# 比较两个版本的差异
+diff_versions("v1.0", "v2.0")
+# → {
+#     "weapons": [
+#       {"name": "12号泵动式霰弹枪", "change": "modified", "field": "时代", "old": "1920s，现代", "new": "禁用"},
+#       {"name": "AK-47", "change": "removed"},
+#     ],
+#     "monsters": [...]
+#   }
+```
+
+### 5. 版本导出/导入
+
+```python
+# 导出为 JSON 文件
+export_version("v2.0", "my_house_rules.json")
+# → 单文件，包含所有修改（从 v1.0 继承的部分不重复存储）
+
+# 其他 KP 导入
+import_version("my_house_rules.json", as_name="v3.0")
+```
+
+## 数据存储
+
+```
+data/versions/
+├── v1.0/                  ← 默认规则，只读
+│   ├── weapons.json
+│   ├── monsters.json
+│   ├── spells.json
+│   ├── skills.json
+│   └── rules/
+│       └── ... (10 files)
+├── v2.0/                  ← 房规版本，仅存差异
+│   ├── diff.json          ← {"weapons": [{"名称": "AK", "时代": "禁用"}, ...]}
+│   └── meta.json          ← {"name": "我的模组房规", "based_on": "v1.0", ...}
+└── index.json             ← 版本列表 [{"id": "v1.0", "name": "七版标准规则", "readonly": true}, ...]
+```
+
+## 实现策略
+
+**先做最小可行版本：**
+1. 版本创建 — 基于 v1.0 复制（实际不在磁盘复制，用 diff 存储）
+2. 单个条目修改 — 只改 diff.json
+3. 查询时版本合并 — 加载 v1.0 + v2.0 的 diff，覆盖查询结果
+4. 版本比较 — 输出 diff.json 的人类可读版本
+
+**后续扩展（本次可不做）：**
+- 导出/导入
+- 全局版本切换命令
+- 多级继承链（v2 → v3 → v4）
+
+## 注意
+
+- v1.0 数据只读，不允许修改
+- diff 增量存储，不重复保存全量数据
+- 支持的数据类型：weapons, monsters, spells, skills, rules（各模块）
+- 每完成一个功能 commit，格式 `feat(version): xxx`
