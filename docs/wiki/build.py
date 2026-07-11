@@ -61,7 +61,7 @@ def main():
         for level, attrs, content in headings:
             text = re.sub(r'<[^>]+>', '', content).strip()
             # 清理特殊字符用于 id
-            clean_id = re.sub(r'[「」""''『』《》（）()？。，！\s]', '', text)
+            clean_id = re.sub(r'[「」""''『』《》（）()？。，！\\s]', '', text)
             old_tag = f'<h{level}{attrs}>{content}</h{level}>'
             new_attrs = re.sub(r'id="[^"]*"', f'id="{clean_id}"', attrs)
             if 'id=' not in new_attrs:
@@ -74,7 +74,7 @@ def main():
         # 同时清理 TOC 链接中的引号，确保与标题 id 匹配
         for m in re.finditer(r'href="#([^"]+)"', readme_html):
             old_href = m.group(1)
-            clean_href = re.sub(r'[「」""''『』《》（）()？。，！\s]', '', old_href)
+            clean_href = re.sub(r'[「」""''『』《》（）()？。，！\\s]', '', old_href)
             if old_href != clean_href:
                 readme_html = readme_html.replace(f'href="#{old_href}"', f'href="#{clean_href}"', 1)
         # 为 Wiki 审查区块添加锚点（h3 不自动生成 id）
