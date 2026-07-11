@@ -102,6 +102,8 @@ border-radius:7px;font-size:13px}
 .mini th{background:#f0efe9;font-weight:600}
 .empty{color:var(--muted);padding:30px;text-align:center}
 footer{color:var(--muted);font-size:12px;padding:14px 22px;border-top:1px solid var(--line)}
+/* 性能优化 */
+table,.cards{content-visibility:auto;contain-intrinsic-size:auto 500px}
 """
 
 def page(title, body, active, updated):
@@ -113,6 +115,8 @@ def page(title, body, active, updated):
     return f"""<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+{''.join(f'<link rel="prefetch" as="document" href="{p}.html">' for p in PAGES)}
+<link rel="prefetch" as="document" href="README.html">
 <title>{h(title)} · RuleWhisper Wiki</title><style>{CSS}</style></head>
 <body><header><h1>RuleWhisper 数据 Wiki</h1>
 <div class="sub">结构化数据审查 · 数据更新时间 {updated}</div></header>

@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="prefetch" as="document" href="weapons.html"><link rel="prefetch" as="document" href="monsters.html"><link rel="prefetch" as="document" href="spells.html"><link rel="prefetch" as="document" href="skills.html"><link rel="prefetch" as="document" href="rules.html">
+<link rel="prefetch" as="document" href="README.html">
 <title>README · RuleWhisper Wiki</title><style>
 :root{--bg:#f7f7f4;--fg:#1f2328;--muted:#6b7280;--line:#e3e3df;
 --accent:#7c2d12;--accent2:#92400e;--card:#fff;--tag:#eef2f7;--tagfg:#334155}
@@ -41,11 +43,17 @@ padding:1px 7px;font-size:11.5px;margin:1px}
 .search input{width:100%;max-width:420px;padding:7px 11px;border:1px solid var(--line);
 border-radius:7px;font-size:13px}
 .note{color:var(--muted);font-size:12px;margin:4px 0 14px}
+.scroll{overflow-x:auto}
+.mini{border:1px solid var(--line);margin:4px 0;font-size:12px;width:auto}
+.mini th,.mini td{border:1px solid var(--line);padding:2px 6px}
+.mini th{background:#f0efe9;font-weight:600}
 .empty{color:var(--muted);padding:30px;text-align:center}
 footer{color:var(--muted);font-size:12px;padding:14px 22px;border-top:1px solid var(--line)}
+/* 性能优化 */
+table,.cards{content-visibility:auto;contain-intrinsic-size:auto 500px}
 </style></head>
 <body><header><h1>RuleWhisper 数据 Wiki</h1>
-<div class="sub">结构化数据审查 · 数据更新时间 2026-07-11 21:24</div></header>
+<div class="sub">结构化数据审查 · 数据更新时间 2026-07-11 21:25</div></header>
 <nav><a class="" href="weapons.html">武器</a><a class="" href="monsters.html">怪物</a><a class="" href="spells.html">法术</a><a class="" href="skills.html">技能</a><a class="" href="rules.html">规则</a><a href="README.html">README</a><a href="https://github.com/AblazeGHR/RuleWhisper" target="_blank" style="font-weight:700;background:#e8f0fe;color:#1a73e8">⭐ GitHub</a></nav><main><h1>RuleWhisper</h1>
 <blockquote>
 <p>COC 全能跑团助手 —— 一个看得懂规则、跟得上进度、帮你承担 KP 压力的跑团 AI。</p>
