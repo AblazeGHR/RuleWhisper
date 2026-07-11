@@ -13,6 +13,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from src.dice import resolver as dice_resolver
 from src.engine import rule_search, structured_query, router
+from src.engine import versioning
+
+
+_VERSION_SUB = {}
 
 
 def _print_json_results(results: list[dict], top_k: int = 8):
@@ -113,6 +117,55 @@ def cmd_query(args: list[str]):
         print("未找到匹配结果。")
 
 
+def cmd_version(args: list[str]):
+    if not args or args[0] not in _VERSION_SUB:
+        _version_usage()
+        return
+    _VERSION_SUB[args[0]](args[1:])
+
+
+def _version_usage():
+    print("版本管理:")
+    print("  version list                        列出所有版本")
+    print("  version create <id> <名称>          创建新版本")
+    print("  version modify <id> <类别> <名称> <字段>=<值>  修改规则")
+    print("  version diff <v1> <v2>              比较两个版本")
+    print("  version default <id>                切换默认版本")
+
+
+def _sub_version_list(args):
+    for v in versioning.get_version_list():
+        default = " (当前)" if v["id"] == versioning.get_default_version() else ""
+        print(f"  {v['id']}: {v['name']}{default}")
+
+
+def _sub_version_create(args):
+    if len(args) < 2:
+        print("用法: version create <id> <名称>")
+        return
+    v = versioning.create_version(args[0], " ".join(args[1:]))
+    print(f"已创建版本 {v['name']} ({args[0]})")
+
+
+def _sub_version_diff(args):
+    if len(args) < 2:
+        print("用法: version diff <v1> <v2>")
+        return
+    diff = versioning.diff_versions(args[0], args[1])
+    for cat, changes in diff.items():
+        if changes:
+            print(f"\n{cat}:")
+            for c in changes[:10]:
+                print(f"  {c['change']}: {c.get('name','?')}")
+
+
+_VERSION_SUB = {
+    "list": _sub_version_list,
+    "create": _sub_version_create,
+    "diff": _sub_version_diff,
+}
+
+
 COMMANDS = {
     "query": cmd_query,
     "rule": cmd_rule,
@@ -122,6 +175,7 @@ COMMANDS = {
     "spell": cmd_spell,
     "skill": cmd_skill,
     "dice": cmd_dice,
+    "version": cmd_version,
 }
 
 
@@ -138,12 +192,11 @@ def main():
         print("  skill <关键词>     查询技能")
         print("  dice <命令>        掷骰 / 检定 (如 \".rc 侦查 55\")")
         print("  rebuild            重建文本索引")
+        print("  version <子命令>   规则版本管理")
         print()
         print("示例:")
         print('  python src/cli.py query "霰弹枪伤害"')
         print('  python src/cli.py query "左轮 .38"')
-        print('  python src/cli.py query "深潜者属性"')
-        print('  python src/cli.py query "侦查技能"')
         print('  python src/cli.py dice ".rc 侦查 55"')
         return
 

@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Optional
 import jieba
 
+from . import versioning
+
 _DATA = Path(__file__).resolve().parent.parent.parent / "data"
 
 _CACHE: dict[str, list[dict]] = {}
@@ -47,33 +49,68 @@ def _match_score(query: str, entry: dict, field: str = "名称") -> float:
     return _jaccard_sim(q_words, t_words)
 
 
-def query_weapons(query: str, top_k: int = 10) -> list[dict]:
-    """Search weapons.json."""
-    data = _load("weapons.json")
+def _resolve_version(version: Optional[str]) -> Optional[str]:
+    """Resolve version parameter: explicit > default > None (use raw data/)."""
+    if version:
+        return version
+    return versioning.get_default_version()
+
+
+def query_weapons(query: str, top_k: int = 10, version: Optional[str] = None) -> list[dict]:
+    """Search weapons (optionally within a rules version)."""
+    ver = _resolve_version(version)
+    if ver:
+        data = versioning.load_version_data(ver, "weapons")
+    else:
+        data = _load("weapons.json")
     scored = [(e, _match_score(query, e)) for e in data]
     scored.sort(key=lambda x: x[1], reverse=True)
     return [e for e, s in scored if s > 0][:top_k]
 
 
-def query_monsters(query: str, top_k: int = 10) -> list[dict]:
-    """Search monsters.json."""
-    data = _load("monsters.json")
+def query_monsters(query: str, top_k: int = 10, version: Optional[str] = None) -> list[dict]:
+    """Search monsters (optionally within a rules version)."""
+    ver = _resolve_version(version)
+    if ver:
+        data = versioning.load_version_data(ver, "monsters")
+    else:
+        data = _load("monsters.json")
     scored = [(e, _match_score(query, e)) for e in data]
     scored.sort(key=lambda x: x[1], reverse=True)
     return [e for e, s in scored if s > 0][:top_k]
 
 
-def query_spells(query: str, top_k: int = 10) -> list[dict]:
-    """Search spells.json."""
-    data = _load("spells.json")
+def query_spells(query: str, top_k: int = 10, version: Optional[str] = None) -> list[dict]:
+    """Search spells (optionally within a rules version)."""
+    ver = _resolve_version(version)
+    if ver:
+        data = versioning.load_version_data(ver, "spells")
+    else:
+        data = _load("spells.json")
     scored = [(e, _match_score(query, e)) for e in data]
     scored.sort(key=lambda x: x[1], reverse=True)
     return [e for e, s in scored if s > 0][:top_k]
 
 
-def query_skills(query: str, top_k: int = 10) -> list[dict]:
-    """Search skills.json."""
-    data = _load("skills.json")
+def query_skills(query: str, top_k: int = 10, version: Optional[str] = None) -> list[dict]:
+    """Search skills (optionally within a rules version)."""
+    ver = _resolve_version(version)
+    if ver:
+        data = versioning.load_version_data(ver, "skills")
+    else:
+        data = _load("skills.json")
+    scored = [(e, _match_score(query, e)) for e in data]
+    scored.sort(key=lambda x: x[1], reverse=True)
+    return [e for e, s in scored if s > 0][:top_k]
+
+
+def query_rules(query: str, top_k: int = 10, version: Optional[str] = None) -> list[dict]:
+    """Search rules (optionally within a rules version)."""
+    ver = _resolve_version(version)
+    if ver:
+        data = versioning.load_version_data(ver, "rules")
+    else:
+        data = _load("rules.json")
     scored = [(e, _match_score(query, e)) for e in data]
     scored.sort(key=lambda x: x[1], reverse=True)
     return [e for e, s in scored if s > 0][:top_k]
