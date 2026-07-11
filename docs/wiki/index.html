@@ -66,7 +66,11 @@ function setActive(page){
 
 function render(){var c=document.getElementById('content');var fn=renderers[PAGE];c.innerHTML=fn?fn():(renderers.index?renderers.index():'')}
 
-window.onhashchange=function(){PAGE=location.hash.slice(1)||'index';setActive(PAGE);render()}
+window.onhashchange=function(){
+  var h=location.hash.slice(1);
+  if(renderers[h]){PAGE=h;setActive(PAGE);render()}
+  else{var el=document.getElementById(h);if(el)el.scrollIntoView({behavior:'smooth'})}
+}
 
 // 搜索框
 function searchBox(id){return'<div class="search"><input placeholder="按关键词过滤…" oninput="var q=this.value.toLowerCase();document.querySelectorAll(\'#content [data-q]\').forEach(function(r){r.style.display=(!q||(r.getAttribute(\'data-q\')||\'\').indexOf(q)>=0)?\'\':\'none\'})"></div>'}
@@ -197,12 +201,11 @@ var renderers={
   },
 
   readme:function(){
-    var s='<div id="readme-container" onclick="var t=event.target;if(t.tagName===\\'A\\'&&t.getAttribute(\\'href\\')&&t.getAttribute(\\'href\\').startsWith(\\'#\\')){event.preventDefault();var id=t.getAttribute(\\'href\\').slice(1);var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:\\'smooth\\'})}">';
-    s+=(DATA.readme||'<div class="empty">README 内容加载失败</div>');
-    s+='</div>';
-    return s;
+    return DATA.readme||'<div class="empty">README 内容加载失败</div>';
   }
 };
+
+buildNav();
 
 buildNav();
 loadData();

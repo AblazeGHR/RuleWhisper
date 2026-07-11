@@ -47,15 +47,40 @@ def main():
     rules_all = load_list(os.path.join(DATA, "rules.json"))
 
     # README 内容
-    import markdown
+    import markdown, re
     readme_html = ""
     readme_md = os.path.join(ROOT, "README.md")
     if os.path.exists(readme_md):
         with open(readme_md, encoding="utf-8") as f:
             md_text = f.read()
-        md_text = md_text.replace("(docs/wiki/)", "(#index)")
+        md_text = md_text.replace("(docs/wiki/)", "(#wiki-data)")
         md_text = md_text.replace("(docs/PLAN.md)", "(https://github.com/AblazeGHR/RuleWhisper/blob/main/docs/PLAN.md)")
-        readme_html = markdown.markdown(md_text, extensions=['tables', 'fenced_code'])
+        readme_html = markdown.markdown(md_text, extensions=['tables', 'fenced_code', 'toc'])
+        # 修复 markdown toc 对中文标题的 id 处理
+        headings = re.findall(r'<h([2-4])([^>]*)>(.*?)</h\1>', readme_html)
+        for level, attrs, content in headings:
+            text = re.sub(r'<[^>]+>', '', content).strip()
+            # 清理特殊字符用于 id
+            clean_id = re.sub(r'[「」""''『』《》（）()？。，！\s]', '', text)
+            old_tag = f'<h{level}{attrs}>{content}</h{level}>'
+            new_attrs = re.sub(r'id="[^"]*"', f'id="{clean_id}"', attrs)
+            if 'id=' not in new_attrs:
+                new_attrs = attrs + f' id="{clean_id}"'
+            new_tag = f'<h{level}{new_attrs}>{content}</h{level}>'
+            readme_html = readme_html.replace(old_tag, new_tag, 1)
+            old_id = re.search(r'id="([^"]*)"', attrs)
+            if old_id and old_id.group(1) != clean_id:
+                readme_html = readme_html.replace(f'href="#{old_id.group(1)}"', f'href="#{clean_id}"', 1)
+        # 同时清理 TOC 链接中的引号，确保与标题 id 匹配
+        for m in re.finditer(r'href="#([^"]+)"', readme_html):
+            old_href = m.group(1)
+            clean_href = re.sub(r'[「」""''『』《》（）()？。，！\s]', '', old_href)
+            if old_href != clean_href:
+                readme_html = readme_html.replace(f'href="#{old_href}"', f'href="#{clean_href}"', 1)
+        # 为 Wiki 审查区块添加锚点（h3 不自动生成 id）
+        readme_html = readme_html.replace('>Wiki 数据审查</a></h3>', '><span id="wiki-data"></span>Wiki 数据审查</a></h3>', 1)
+        # 处理 NPC 条目的 id 不一致
+        readme_html = readme_html.replace('id="NPC与场景生成"', 'id="npc-与场景生成"')
 
     rules_modules = {}
     for key, path in sorted((os.path.splitext(os.path.basename(p))[0], p)
@@ -148,7 +173,11 @@ function setActive(page){
 
 function render(){var c=document.getElementById('content');var fn=renderers[PAGE];c.innerHTML=fn?fn():(renderers.index?renderers.index():'')}
 
-window.onhashchange=function(){PAGE=location.hash.slice(1)||'index';setActive(PAGE);render()}
+window.onhashchange=function(){
+  var h=location.hash.slice(1);
+  if(renderers[h]){PAGE=h;setActive(PAGE);render()}
+  else{var el=document.getElementById(h);if(el)el.scrollIntoView({behavior:'smooth'})}
+}
 
 // 搜索框
 function searchBox(id){return'<div class="search"><input placeholder="按关键词过滤…" oninput="var q=this.value.toLowerCase();document.querySelectorAll(\'#content [data-q]\').forEach(function(r){r.style.display=(!q||(r.getAttribute(\'data-q\')||\'\').indexOf(q)>=0)?\'\':\'none\'})"></div>'}
@@ -279,12 +308,11 @@ var renderers={
   },
 
   readme:function(){
-    var s='<div id="readme-container" onclick="var t=event.target;if(t.tagName===\\'A\\'&&t.getAttribute(\\'href\\')&&t.getAttribute(\\'href\\').startsWith(\\'#\\')){event.preventDefault();var id=t.getAttribute(\\'href\\').slice(1);var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:\\'smooth\\'})}">';
-    s+=(DATA.readme||'<div class="empty">README 内容加载失败</div>');
-    s+='</div>';
-    return s;
+    return DATA.readme||'<div class="empty">README 内容加载失败</div>';
   }
 };
+
+buildNav();
 
 buildNav();
 loadData();
