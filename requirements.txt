@@ -4,8 +4,8 @@ pypdfium2
 # Full-text search
 jieba
 
-# Optional: P2 table extraction
-# pdfplumber
+# P2 table extraction
+pdfplumber
 
 # Optional: P4 RAG vector search
 # chromadb
