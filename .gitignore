@@ -3,3 +3,4 @@
 __pycache__/
 *.pyc
 data/index.json
+data/ch14_raw.txt
