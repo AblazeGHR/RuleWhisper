@@ -96,6 +96,10 @@ padding:1px 7px;font-size:11.5px;margin:1px}
 .search input{width:100%;max-width:420px;padding:7px 11px;border:1px solid var(--line);
 border-radius:7px;font-size:13px}
 .note{color:var(--muted);font-size:12px;margin:4px 0 14px}
+.scroll{overflow-x:auto}
+.mini{border:1px solid var(--line);margin:4px 0;font-size:12px;width:auto}
+.mini th,.mini td{border:1px solid var(--line);padding:2px 6px}
+.mini th{background:#f0efe9;font-weight:600}
 .empty{color:var(--muted);padding:30px;text-align:center}
 footer{color:var(--muted);font-size:12px;padding:14px 22px;border-top:1px solid var(--line)}
 """
@@ -142,7 +146,7 @@ def weapons_page():
         groups.setdefault(r.get("类别", "未分类"), []).append(r)
     cols = [("名称", "名称"), ("技能", "技能"), ("伤害", "伤害"),
             ("基础射程", "射程"), ("每轮", "每轮"), ("装弹量", "装弹量"),
-            ("价格", "价格"), ("故障值", "故障值"), ("时代", "时代")]
+            ("价格", "价格"), ("故障值", "故障值"), ("贯穿", "贯穿"), ("时代", "时代")]
     body = "<h2>武器总览</h2><div class='note'>按「类别」折叠，点击分组标题展开/收起。</div>"
     for cat in sorted(groups):
         items = groups[cat]
@@ -159,31 +163,75 @@ def monsters_page():
     rows = load_list(os.path.join(DATA, "monsters.json"))
     if not rows:
         return None, 0
-    body = "<h2>怪物卡</h2><div class='note'>属性卡片视图，便于核对数值与骰子。</div><div class='cards'>"
+    groups = {}
     for r in rows:
-        name = h(r.get("名称", ""))
-        aka = h(r.get("别名", ""))
-        def attr(*ks):
-            return "".join(f"<span><b>{h(k)}</b> {h(r.get(k,''))}</span>" for k in ks)
-        card = f"<div class='card'><h3>{name}</h3>"
-        if aka:
-            card += f"<div class='aka'>别名：{aka}</div>"
-        card += "<div class='kv'>" + attr("STR", "CON", "SIZ", "DEX", "INT", "POW",
-                                          "HP", "魔法值", "伤害加值", "体格", "移动", "每回合攻击") + "</div>"
-        card += (f"<div class='row'><span><b>格斗</b> {h(r.get('格斗',''))}% "
-                 f"(困难 {h(r.get('格斗_困难',''))}/极难 {h(r.get('格斗_极难',''))})</span>"
-                 f"<span><b>伤害</b> {h(r.get('格斗_伤害',''))}</span></div>")
-        card += (f"<div class='row'><span><b>闪避</b> {h(r.get('闪避',''))}% "
-                 f"(困难 {h(r.get('闪避_困难',''))}/极难 {h(r.get('闪避_极难',''))})</span></div>")
-        card += f"<div class='row'><span><b>护甲</b> {h(r.get('护甲',''))}</span></div>"
-        if r.get("技能"):
-            card += f"<div class='row'><span><b>技能</b> {h(r.get('技能',''))}</span></div>"
-        if r.get("理智损失"):
-            card += f"<div class='row'><span><b>理智损失</b> {h(r.get('理智损失',''))}</span></div>"
-        card += "</div>"
-        body += card
-    body += "</div>"
+        groups.setdefault(r.get("分类", "未分类"), []).append(r)
+    body = search_box(".monsters") + "<h2>怪物卡</h2>" \
+           "<div class='note'>按「分类」折叠，点击分组标题展开/收起；顶部可关键词过滤。</div>"
+    for cat in sorted(groups):
+        items = groups[cat]
+        body += f"<details open><summary>{h(cat)}<span class='cnt'>{len(items)} 只</span></summary>" \
+                "<div class='cards'>"
+        for r in items:
+            body += monster_card(r)
+        body += "</div></details>"
+    body += JS_FILTER
     return body, len(rows)
+
+
+def monster_card(r):
+    name = h(r.get("名称", ""))
+    aka = h(r.get("别名", ""))
+    attrs = r.get("属性", {}) or {}
+    dice = r.get("掷骰", {}) or {}
+    kv = "".join(
+        f"<span><b>{k}</b> {h(attrs.get(k,'') or '—')}"
+        + (f" <i>({h(dice.get(k,''))})</i>" if dice.get(k) else "") + "</span>"
+        for k in ("STR", "CON", "SIZ", "DEX", "INT", "POW"))
+    kv += "".join(
+        f"<span><b>{k}</b> {h(r.get(k,'') or '—')}</span>"
+        for k in ("HP", "魔法值", "伤害加值", "体格", "移动", "每回合攻击"))
+    card = f"<div class='card' data-search='{h(monster_search(r))}'><h3>{name}</h3>"
+    if aka:
+        card += f"<div class='aka'>别名：{aka}</div>"
+    card += f"<div class='tag' style='margin-bottom:6px'>{h(r.get('分类',''))}</div>"
+    card += "<div class='kv'>" + kv + "</div>"
+    g = r.get("格斗")
+    if g is not None:
+        card += f"<div class='row'><span><b>格斗</b> {h(g)}%</span>" \
+                f"<span><b>伤害</b> {h(r.get('格斗_伤害',''))}</span></div>"
+    d = r.get("闪避")
+    if d is not None:
+        card += f"<div class='row'><span><b>闪避</b> {h(d)}%</span></div>"
+    card += f"<div class='row'><span><b>护甲</b> {h(r.get('护甲',''))}</span></div>"
+    for fld in ("技能", "战斗方式", "法术", "特殊能力", "理智损失"):
+        v = r.get(fld)
+        if isinstance(v, list):
+            if v:
+                card += f"<div class='row'><span><b>{fld}</b></span></div>" \
+                        "<div class='row'><ol style='margin:2px 0;padding-left:18px'>" + \
+                        "".join(f"<li>{h(x)}</li>" for x in v) + "</ol></div>"
+        elif v not in (None, "", "无。"):
+            card += f"<div class='row'><span><b>{fld}</b> {h(v)}</span></div>"
+    src = r.get("来源章节")
+    if src:
+        card += f"<div class='row'><span class='tag'>{h(src)}</span>" \
+                f"<span class='tag'>{h(r.get('id',''))}</span></div>"
+    card += "</div>"
+    return card
+
+
+def monster_search(r):
+    def part(v):
+        if v is None or v == "":
+            return ""
+        if isinstance(v, list):
+            return " ".join(str(x) for x in v)
+        return str(v)
+    s = " ".join(part(r.get(k)) for k in
+                 ("名称", "别名", "分类", "技能", "战斗方式", "法术", "特殊能力", "理智损失", "来源章节", "id"))
+    s += " " + " ".join(part(v) for v in (r.get("属性", {}) or {}).values())
+    return s
 
 
 def spells_page():
@@ -214,35 +262,75 @@ def skills_page():
     return body, len(rows)
 
 
+def fmt_val(v):
+    """把规则字段值渲染为 HTML：列表→顿号连接，其余→转义文本。"""
+    if isinstance(v, list):
+        return h("、".join(str(x) for x in v))
+    return h(v)
+
+
+def fmt_table(val):
+    """把规则里的 数值/参考表/症状表 渲染为嵌套小表格、有序列表或键值表。"""
+    if not val:
+        return ""
+    if isinstance(val, dict):
+        rows = "".join(
+            f"<tr><th style='text-align:left'>{h(k)}</th><td>{fmt_val(v)}</td></tr>"
+            for k, v in val.items())
+        return f"<table class='mini'><tbody>{rows}</tbody></table>"
+    if isinstance(val, list):
+        if val and isinstance(val[0], dict):
+            keys = list(val[0].keys())
+            head = "".join(f"<th>{h(k)}</th>" for k in keys)
+            rows = "".join(
+                "<tr>" + "".join(f"<td>{h(d.get(k,''))}</td>" for k in keys) + "</tr>"
+                for d in val)
+            return f"<table class='mini'><thead><tr>{head}</tr></thead><tbody>{rows}</tbody></table>"
+        return "<ol style='margin:2px 0;padding-left:18px'>" + \
+            "".join(f"<li>{h(x)}</li>" for x in val) + "</ol>"
+    return h(val)
+
+
 def rule_row(r):
     s = " ".join(str(r.get(k, "")) for k in
-                 ("id", "标签", "触发条件", "机制效果", "相关检定", "原文引用"))
+                 ("id", "触发条件", "机制效果", "原文引用", "说明")) \
+        + " " + " ".join(r.get("相关检定", [])) \
+        + " " + " ".join(r.get("标签", []))
     tags = "".join(f"<span class='tag'>{h(t)}</span>" for t in r.get("标签", []))
     flow = r.get("判定流程")
     flow = "".join(f"<li>{h(x)}</li>" for x in flow) if isinstance(flow, list) else h(flow)
+    mech = h(r.get("机制效果", ""))
+    if r.get("特殊规则"):
+        mech += f" <br><i>特殊：{h(r.get('特殊规则'))}</i>"
+    if r.get("说明"):
+        mech += f" <br><i>说明：{h(r.get('说明'))}</i>"
+    if r.get("原文引用"):
+        mech += f" <br><blockquote style='margin:4px 0;color:var(--muted)'>“{h(r.get('原文引用'))}”</blockquote>"
+    extra = fmt_table(r.get("参考表")) + fmt_table(r.get("症状表"))
     cells = [
         f"<td class='mono'>{h(r.get('id',''))}</td>",
         f"<td>{tags or h(r.get('章节',''))}</td>",
         f"<td>{h(r.get('触发条件',''))}</td>",
-        f"<td>{h(r.get('机制效果',''))}{(' <br><i>'+h(r.get('特殊规则',''))+'</i>') if r.get('特殊规则') else ''}</td>",
+        f"<td>{mech}</td>",
         f"<td>{h('、'.join(r.get('相关检定', [])))}</td>",
         f"<td><ol style='margin:0;padding-left:18px'>{flow}</ol></td>",
-        f"<td>{h(r.get('数值','')) or ''}</td>",
+        f"<td>{extra}</td>",
+        f"<td>{fmt_table(r.get('数值')) or ''}</td>",
         f"<td class='mono'>{h(r.get('页码',''))}</td>",
     ]
     return f"<tr data-search='{h(s)}'>" + "".join(cells) + "</tr>"
 
 
 RULE_HEAD = ("<th>id</th><th>标签</th><th>触发条件</th><th>机制效果</th>"
-             "<th>相关检定</th><th>判定流程</th><th>数值</th><th>页</th>")
+             "<th>相关检定</th><th>判定流程</th><th>参考/症状表</th><th>数值</th><th>页</th>")
 
 
 def rules_module_page(key, items):
     body = search_box(f".mod-{key}") + f"<h2>{h(key)} 模块（{len(items)} 条）</h2>"
-    body += f"<table class='mod-{key} mono'><thead><tr>{RULE_HEAD}</tr></thead><tbody>"
+    body += f"<div class='scroll'><table class='mod-{key} mono'><thead><tr>{RULE_HEAD}</tr></thead><tbody>"
     for r in items:
         body += rule_row(r)
-    body += "</tbody></table>" + JS_FILTER
+    body += "</tbody></table></div>" + JS_FILTER
     return body
 
 
