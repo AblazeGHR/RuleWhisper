@@ -1,6 +1,5 @@
-# COC 全能跑团助手 — 项目状态与规划
-
-> 面向开发者。社区版可见 [README.md](../README.md)。
+# RuleWhisper — 项目状态与规划
+> COC 全能跑团助手。面向开发者。社区版可见 [README.md](../README.md)。
 
 ## 当前状态
 
