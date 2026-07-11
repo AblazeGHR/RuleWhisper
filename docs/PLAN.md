@@ -1,6 +1,6 @@
 # COC 全能跑团助手 — 项目状态与规划
 
-> 本文档面向开发者，记录当前进度、数据架构和未来路线。
+> 面向开发者。社区版可见 [README.md](../README.md)。
 
 ## 当前状态
 
@@ -8,77 +8,93 @@
 
 | 模块 | 产出 | 状态 |
 |------|------|------|
-| **P1 规则搜索引擎** | `src/engine/indexer.py` / `rule_search.py`，jieba 分词 + TF-IDF 倒排索引，CLI `rule` 命令 | ✅ |
-| **P2 武器数据** | `data/weapons.json`，98 武器，12 分类，完整覆盖规则书附录 | ✅ |
-| **P2 查询引擎** | `src/engine/structured_query.py`，CLI `weapon`/`monster`/`spell`/`skill` 命令 | ✅ |
-| **P2 技能数据** | `data/skills.json`，84 技能，名称 + 基础值 | ✅ |
-| **P3 规则数据** | `data/rules.json`（83 条）+ `data/rules/*.json`（191 条，10 模块） | ✅ |
-| **P3 怪物数据** | `data/monsters.json`，88 怪物（神话生物 37 + 神灵 30 + 经典 7 + 野兽 14），hy3 提取 | ✅ |
-| **Wiki 可视化** | `docs/wiki/build.py`，静态 HTML 生成，可审查全部数据 | ✅ |
+| P1 规则搜索引擎 | jieba + TF-IDF 倒排索引，CLI `rule` 命令 | ✅ |
+| P2 武器数据 | `weapons.json`，98 武器，12 分类 | ✅ |
+| P2 技能数据 | `skills.json`，84 技能 | ✅ |
+| P2 查询引擎 | `structured_query.py`，CLI `weapon`/`monster`/`spell`/`skill` | ✅ |
+| P3 规则知识库 | `rules/*.json`，191 条，10 模块，全模块字段完整 | ✅ |
+| P3 怪物数据 | `monsters.json`，88 只（神话 37+神灵 30+经典 7+野兽 14） | ✅ |
+| Wiki 可视化 | `docs/wiki/build.py`，静态 HTML 审查工具 | ✅ |
 
-### 进行中
+### 进行中（hy3 自动提取）
 
-| 模块 | 内容 | 分支 |
+| 任务 | 说明 | 分支 |
 |------|------|------|
-| **理智字段补全** | 15 条规则缺判定流程/相关检定，需 Read 补字段 | `hy3-monsters` (prompt2.md) |
-| **法术数据提取** | 第十二章 50+ 法术，当前仅 24 条联络/请神术 | `hy3-monsters` (prompt3.md) |
+| prompt3 — 法术提取 | 第十二章 50+ 法术 | `hy3-monsters` |
+| prompt4 — 原文引用补全 | sanity.json 10 条 | `hy3-monsters` |
 
-### 数据层架构
+### 工作树
+
+```
+D:/project/ai_coc/        → main
+D:/project/ai_coc_hy3/    → hy3-monsters (prompt3/prompt4)
+D:/project/ai_coc_wiki/   → wiki-view (审查工具)
+```
+
+## 数据层架构
 
 ```
 data/
-├── 守秘人规则书.txt              # 原始 txt (1.5MB, 400页)
-├── weapons.json                  # 武器 (98, P2)
-├── monsters.json                 # 怪物 (88, P3/hy3)
-├── spells.json                   # 法术 (24, P2 — 待 P3/hy3 补全)
-├── skills.json                   # 技能 (84, P2)
-├── rules.json                    # 规则合并视图 (83条)
-└── rules/                        # 规则模块化源文件 (191条, 10模块)
-    ├── build.py                  # 模块 → 合并视图 编译脚本
-    ├── sanity.json               # 理智 (29) — 待补字段
-    ├── combat.json               # 战斗 (42)
-    ├── magic.json                # 魔法 (20)
-    ├── chase.json                # 追逐 (30)
-    ├── game_system.json          # 游戏系统 (20)
-    ├── character_creation.json   # 创建调查员 (19)
-    ├── skills.json               # 技能规则 (10)
-    ├── interlude.json            # 幕间成长 (4)
-    ├── keeper.json               # 主持游戏 (9)
-    └── appendix.json             # 附录 (8)
+├── 守秘人规则书.txt
+├── weapons.json          (98)
+├── monsters.json         (88)
+├── spells.json           (24)          ← hy3 补全中
+├── skills.json           (84)
+└── rules/                (191 条，10 模块)
+    ├── build.py          # 编译 → rules.json
+    ├── sanity.json       # 理智 (29) ✅
+    ├── combat.json       # 战斗 (42) ✅
+    ├── magic.json        # 魔法 (20) ✅
+    ├── chase.json        # 追逐 (30) ✅
+    ├── game_system.json  # 游戏系统 (20) ✅
+    └── ...
 ```
 
-**数据走向：** 模块 JSON（手编/手动校验）→ `build.py` → `rules.json`（查询用）→ 搜索引擎/RAG
+## 下一步开发
 
-### 查询能力
+### 当前：数据收尾
+
+1. prompt3 — hy3 提取法术（第十二章 50+ 条）
+2. prompt4 — hy3 补 sanity 原文引用（10 条）
+3. 合并 hy3 → main，清理工作树
+
+### 接下来：Router + RAG（P4）
+
+统一查询调度层，四档分发：
 
 ```
-python src/cli.py rule "霰弹枪伤害"      → 全文搜索（P1）
-python src/cli.py weapon "左轮"         → 武器查询（P2）
-python src/cli.py monster "深潜者"      → 怪物查询（P2）
-python src/cli.py spell "联络术"        → 法术查询（P2）
-python src/cli.py skill "侦查"          → 技能查询（P2）
+用户输入
+    │
+    ▼
+┌─────────────┐   规则匹配 → weapon/monster/spell/skill 结构化查询
+│ 规则匹配     │
+└──────┬──────┘
+       │ 未命中
+       ▼
+┌─────────────┐   jieba + TF-IDF → 返回规则段落
+│ 全文搜索     │
+└──────┬──────┘
+       │ 相关性 < 阈值
+       ▼
+┌─────────────┐   chromadb + bge-small-zh → 语义最近邻
+│ RAG 检索     │
+└──────┬──────┘
+       │ 仍无
+       ▼
+┌─────────────┐   LLM 理解自然语言意图
+│ LLM 兜底     │
+└─────────────┘
 ```
 
-## 未来路线
+技术栈：`chromadb` + `BAAI/bge-small-zh-v1.5`（本地 embedding）
 
-### P4 — RAG 语义检索
-- `chromadb` 本地向量库
-- `BAAI/bge-small-zh-v1.5` 中文 embedding
-- 规则书全文 + 结构化 JSON 混合检索
+### 远期路线
 
-### P5 — QQ Bot 接入
-- NapCat HTTP API 解耦接入
-- Q 群内 `!coc 规则` / `.rc` 骰令
-
-### P6 — 骰子与机制引擎
-- COC 7th 完整骰子（奖励骰/惩罚骰/成功等级判定）
-- 兼容塔骰/豹骰命令格式
-
-### P7 — 生成器引擎
-- NPC 工厂（年代/职业/难度）
-- 随机遭遇表
-- 线索/场景生成器
-
-### P8 — 自定义规则
-- 基于 `data/rules/` 模块化 JSON，支持派生子规则
-- 武器/怪物/法术的自定义修改与版本管理
+| 阶段 | 内容 |
+|------|------|
+| P5 骰子引擎 | `.rc`/`.ra`/`.rb`/`.rp`/`.sc`/`.dam`，成功等级自动判定，兼容塔骰/豹骰命令 |
+| P6 QQ Bot | NapCat HTTP API 接入，群内 `!coc` 规则速查 + `.rc` 骰令 + 自然语言问答 |
+| P7 角色卡 | CRUD + Excel 导入解析 + 跑团后导出更新卡 |
+| P8 战斗/追逐 | 敏捷排序 → 攻防判定 → 战技/贯穿/伤害结算 → 状态追踪全自动 |
+| P9 规则派生 | 版本管理：创建/继承/比较/导出，v1.0 锁只读 |
+| P10 生成器 | NPC 工厂（年代/职业/难度）、集群生成、场景叙事文本辅助 |
