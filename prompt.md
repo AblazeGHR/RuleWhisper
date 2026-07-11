@@ -147,7 +147,7 @@
 d:/project/ai_coc_p3/        ← 你在这里
 ├── data/
 │   ├── 守秘人规则书.txt      ← 1.5MB 规则书全文
-│   ├── rules.json            ← 提取结果（当前 113 条）
+│   ├── rules.json            ← 提取结果（当前 169 条，全部 8 章已完成）
 │   └── weapons.json          ← P2 武器数据（已有，无关本轮任务）
 ├── prompts/                  ← 创建此目录存放 prompt
 └── src/                      ← 现有引擎代码
@@ -158,7 +158,7 @@ d:/project/ai_coc_p3/        ← 你在这里
 > 工作树：`d:/project/ai_coc_p3`，分支 `p3-rule-extract`，请勿窜到其他工作树。
 > 用户指令：自主持续工作，决策点前 commit；如有问题用户自行回滚。
 
-### 已完成章节（合计 113 条，commit 于 `7224fa5`）
+### 已完成章节（合计 169 条，HEAD = `4d8860e`）
 
 | 章节 | TXT 页码 | 条数 | commit | 备注 |
 |------|----------|------|--------|------|
@@ -166,8 +166,14 @@ d:/project/ai_coc_p3/        ← 你在这里
 | 第六章 战斗 | 86-111 | 42 | `959cab7` | `combat_round_structure`/`melee_opposed_check`/`extreme_success_impale`/`armor_damage_reduction`/`major_wound_effect` 等 |
 | 第五章 游戏系统 | 72-85 | 24 | `8cf0379` | `skill_check_definition`/`push_check`/`bonus_penalty_dice`/`critical_success_fumble` 等 |
 | 第七章 追逐 | 112-129 | 30 | `7224fa5` | `action_points`/`chase_hazards`/`breaking_obstacles`/`table_v_vehicles` 等 |
+| 第四章 技能 | 44-70 | 10 | `491fe74` | `skill_difficulty_thresholds`/`combined_skill_check`(与Ch5重复已去重)/`dodge_half_dex`/`transferable_skill_advantage` 等 |
+| 第三章 创建调查员 | 24-43 | 18 | `ddcb168` | `attribute_rolling`/`health_points_formula`/`damage_bonus_build_table`/`movement_mov`/`age_modifiers` 等 |
+| 第九章 魔法 | 144-152 | 20 | `b394cd5` | `spellbook_reading_check`/`cmi_cmf_sanity`/`cast_spell_first_check`/`cast_spell_push`/`becoming_believer` 等 |
+| 第十六章 附录 | 356-392 | 8 | `4d8860e` | `death_single_exceed_max_hp`/`outnumbered_bonus_die`/`point_blank_bonus_die`/`attribute_check_multiplier` 等 |
 
-验收标准下限（60-100 条）已超出，但仍有章节未提取。
+**全部 8 章已提取完成，验收标准（60-100 条、可按标签检索、JSON 可解析）已远超。**
+
+> 说明：第十六章附录主体为术语表（多为前章规则的重述）与物价/武器价格表（武器价格已由 P2 `weapons.json` 覆盖），故仅提取 8 条该章**独有**的机械规则；恐惧/躁狂症状表（表IX/表X）实际位于第八章理智范围内（lines 9231/9380），不属于附录页范围。
 
 ### 提取方法论（每章统一流程）
 
@@ -190,16 +196,18 @@ d:/project/ai_coc_p3/        ← 你在这里
 
 ### 待提取章节（按优先级）
 
-| 优先级 | 章节 | TXT 页码 | grep 定位正则示例 |
-|--------|------|----------|-------------------|
-| 5 | 第四章 技能 | 44-70 | `grep -n "===== 第 4[4-9] 页\|===== 第 5[0-9] 页\|===== 第 6[0-9] 页 ====="` |
-| 6 | 第三章 创建调查员 | 24-43 | `grep -n "===== 第 2[4-9] 页\|===== 第 3[0-9] 页\|===== 第 4[0-3] 页 ====="` |
-| 7 | 第九章 魔法 | 144-152 | `grep -n "===== 第 14[4-9] 页\|===== 第 15[0-2] 页 ====="` |
-| 8 | 第十六章 附录 | 356-392 | `grep -n "===== 第 3[5-9][0-9] 页\|===== 第 39[0-2] 页 ====="` |
+> ✅ 全部 8 章已提取完成（见上表）。无需再提取。
+
+| 优先级 | 章节 | TXT 页码 | 状态 |
+|--------|------|----------|------|
+| 5 | 第四章 技能 | 44-70 | ✅ 已完成 (`491fe74`) |
+| 6 | 第三章 创建调查员 | 24-43 | ✅ 已完成 (`ddcb168`) |
+| 7 | 第九章 魔法 | 144-152 | ✅ 已完成 (`b394cd5`) |
+| 8 | 第十六章 附录 | 356-392 | ✅ 已完成 (`4d8860e`) |
 
 ### 待确认事项
 
-- 可能存在残留未跟踪文件 `data/ch6_combat.txt`（早期参考文本），接手时 `git status` 确认，如无用可清理。
+- 残留未跟踪文件 `data/ch6_combat.txt` 经核查**不存在**（已确认 `git status` 干净、目录无此文件）。
 
 ---
 
@@ -212,9 +220,9 @@ d:/project/ai_coc_p3/        ← 你在这里
 
 ---
 
-## 接手步骤（新 session）
+## 后续可选项（全部章节提取完成后的增强方向）
 
-1. `cd /d/project/ai_coc_p3 && git status && git branch --show-current` 确认在 `p3-rule-extract` 且工作树干净
-2. `python -c "import json;print(len(json.load(open('data/rules.json',encoding='utf-8'))))"` 确认当前条数
-3. 从「待提取章节」选最高优先级（第四章 技能）开始，按「提取方法论」执行
-4. 每章提取完 commit，继续下一章，直到第十六章附录完成
+1. **去重与一致性复查**：跨章节检查重复/冲突规则（如 `combined_skill_check` 已在 Ch4/Ch5 去重，确认其他无遗漏）。
+2. **标签检索验证**：确认每条规则带 1-5 个标签，便于 `grep` 按关键词（理智/战斗/魔法/属性）检索。
+3. **补充遗漏机制**：视需要回溯第八章范围（lines 8678-9921）内的表IX恐惧症状表、表X躁狂症状表（目前未单独提取为规则条目）。
+4. **格式校验**：`python -c "import json;json.load(open('data/rules.json',encoding='utf-8'))"` 确认 JSON 可解析（已通过）。
