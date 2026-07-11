@@ -48,9 +48,11 @@ with open('data/ch12_raw.txt', 'w', encoding='utf-8') as f:
 
 ## 执行方法
 
-1. 生成 `data/ch12_raw.txt`
-2. Read 逐块提取（每次 250-400 行）
-3. 写入临时文件，用 Python 去重合并回 `data/spells.json`
+**重要：不要写 Python/正则提取脚本。** 现有 spells.json 只有 24 条就是因为正则提取不可靠（法术格式多变、多行断裂）。提取流程是：
+
+1. 生成 `data/ch12_raw.txt`（一行 Python）
+2. **用 Read 工具读取文本片段**（每次 250-400 行），直接理解并写出 JSON
+3. 每组法术写出后，用 Python 去重合并回 `data/spells.json`
 4. 每完成一个法术类别 commit 一次
 5. 校验：`python -c "import json;json.load(open('data/spells.json','utf-8'))"`
 
