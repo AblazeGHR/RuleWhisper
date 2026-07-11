@@ -147,10 +147,61 @@
 d:/project/ai_coc_p3/        ← 你在这里
 ├── data/
 │   ├── 守秘人规则书.txt      ← 1.5MB 规则书全文
+│   ├── rules.json            ← 提取结果（当前 113 条）
 │   └── weapons.json          ← P2 武器数据（已有，无关本轮任务）
 ├── prompts/                  ← 创建此目录存放 prompt
 └── src/                      ← 现有引擎代码
 ```
+
+## 当前进度（P3 自动提取 session）
+
+> 工作树：`d:/project/ai_coc_p3`，分支 `p3-rule-extract`，请勿窜到其他工作树。
+> 用户指令：自主持续工作，决策点前 commit；如有问题用户自行回滚。
+
+### 已完成章节（合计 113 条，commit 于 `7224fa5`）
+
+| 章节 | TXT 页码 | 条数 | commit | 备注 |
+|------|----------|------|--------|------|
+| 第八章 理智 | 130-143 | 17 | `67c1c9c` | 由用户提交版本（`sanity_check_basic` 等 17 条），**保留此版本**，不要用自己的版本覆盖 |
+| 第六章 战斗 | 86-111 | 42 | `959cab7` | `combat_round_structure`/`melee_opposed_check`/`extreme_success_impale`/`armor_damage_reduction`/`major_wound_effect` 等 |
+| 第五章 游戏系统 | 72-85 | 24 | `8cf0379` | `skill_check_definition`/`push_check`/`bonus_penalty_dice`/`critical_success_fumble` 等 |
+| 第七章 追逐 | 112-129 | 30 | `7224fa5` | `action_points`/`chase_hazards`/`breaking_obstacles`/`table_v_vehicles` 等 |
+
+验收标准下限（60-100 条）已超出，但仍有章节未提取。
+
+### 提取方法论（每章统一流程）
+
+1. 用 `grep -n "===== 第 N 页 ====="` 定位章节起止行号（注意：书页号 = TXT 标记页码 - 1）
+2. 分块 `Read` 规则书文本（每次 280-470 行）
+3. 提取为临时文件 `data/_chX_temp.json`（数组）
+4. 用 Python 合并脚本追加到 `data/rules.json`（base + 新，按 `id` 去重）：
+   ```python
+   import json
+   base = json.load(open('data/rules.json', encoding='utf-8'))
+   new  = json.load(open('data/_chX_temp.json', encoding='utf-8'))
+   ids  = [x['id'] for x in base]
+   merged = base + [x for x in new if x['id'] not in ids]
+   json.dump(merged, open('data/rules.json','w',encoding='utf-8'),
+             ensure_ascii=False, indent=2)
+   ```
+5. 删除 `_chX_temp.json`，`python -c "import json;json.load(open('data/rules.json',encoding='utf-8'))"` 校验
+6. `git add data/rules.json && git commit -m "feat(P3): LLM rule extraction - Chapter X ..."`
+7. **注意**：可能存在并行提交者（用户/进程）会先提交合并结果。若 `git commit` 报 `nothing to commit`，先 `git log` 确认 HEAD 是否已含本次合并，再决定是否需要重做。
+
+### 待提取章节（按优先级）
+
+| 优先级 | 章节 | TXT 页码 | grep 定位正则示例 |
+|--------|------|----------|-------------------|
+| 5 | 第四章 技能 | 44-70 | `grep -n "===== 第 4[4-9] 页\|===== 第 5[0-9] 页\|===== 第 6[0-9] 页 ====="` |
+| 6 | 第三章 创建调查员 | 24-43 | `grep -n "===== 第 2[4-9] 页\|===== 第 3[0-9] 页\|===== 第 4[0-3] 页 ====="` |
+| 7 | 第九章 魔法 | 144-152 | `grep -n "===== 第 14[4-9] 页\|===== 第 15[0-2] 页 ====="` |
+| 8 | 第十六章 附录 | 356-392 | `grep -n "===== 第 3[5-9][0-9] 页\|===== 第 39[0-2] 页 ====="` |
+
+### 待确认事项
+
+- 可能存在残留未跟踪文件 `data/ch6_combat.txt`（早期参考文本），接手时 `git status` 确认，如无用可清理。
+
+---
 
 ## 开始第一步
 
@@ -158,3 +209,12 @@ d:/project/ai_coc_p3/        ← 你在这里
 2. 按上述格式提取所有机械规则
 3. 输出到 `data/rules.json`
 4. 发回成果让我在主分支 review
+
+---
+
+## 接手步骤（新 session）
+
+1. `cd /d/project/ai_coc_p3 && git status && git branch --show-current` 确认在 `p3-rule-extract` 且工作树干净
+2. `python -c "import json;print(len(json.load(open('data/rules.json',encoding='utf-8'))))"` 确认当前条数
+3. 从「待提取章节」选最高优先级（第四章 技能）开始，按「提取方法论」执行
+4. 每章提取完 commit，继续下一章，直到第十六章附录完成
