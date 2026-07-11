@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>技能 · RuleWhisper Wiki</title><style>
+:root{--bg:#f7f7f4;--fg:#1f2328;--muted:#6b7280;--line:#e3e3df;
+--accent:#7c2d12;--accent2:#92400e;--card:#fff;--tag:#eef2f7;--tagfg:#334155}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.6 -apple-system,Segoe UI,Roboto,"Microsoft YaHei",sans-serif;
+background:var(--bg);color:var(--fg)}
+header{background:var(--accent);color:#fff;padding:14px 22px}
+header h1{margin:0;font-size:18px}
+header .sub{opacity:.85;font-size:12px;margin-top:2px}
+nav{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);
+display:flex;flex-wrap:wrap;gap:4px;padding:8px 22px}
+nav a{text-decoration:none;color:var(--fg);padding:5px 12px;border-radius:6px;font-size:13px}
+nav a:hover{background:var(--tag)}
+nav a.active{background:var(--accent);color:#fff}
+main{padding:18px 22px;max-width:1180px;margin:0 auto}
+h2{font-size:16px;margin:22px 0 10px;color:var(--accent2)}
+table{border-collapse:collapse;width:100%;background:var(--card);margin:8px 0 18px;
+font-size:13px}
+th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:#f0efe9;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafaf8}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+details{border:1px solid var(--line);border-radius:8px;background:var(--card);
+margin:10px 0;overflow:hidden}
+summary{cursor:pointer;padding:10px 14px;font-weight:600;background:#f0efe9;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary .cnt{color:var(--muted);font-weight:400;margin-left:6px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:14px 16px}
+.card h3{margin:0 0 2px;font-size:15px}
+.card .aka{color:var(--muted);font-size:12px;margin-bottom:8px}
+.kv{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 14px;font-size:12.5px}
+.kv b{color:var(--muted);font-weight:500}
+.card .row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 0;font-size:12.5px}
+.tag{display:inline-block;background:var(--tag);color:var(--tagfg);border-radius:4px;
+padding:1px 7px;font-size:11.5px;margin:1px}
+.search{position:sticky;top:46px;z-index:4;background:var(--bg);padding:8px 0 12px}
+.search input{width:100%;max-width:420px;padding:7px 11px;border:1px solid var(--line);
+border-radius:7px;font-size:13px}
+.note{color:var(--muted);font-size:12px;margin:4px 0 14px}
+.empty{color:var(--muted);padding:30px;text-align:center}
+footer{color:var(--muted);font-size:12px;padding:14px 22px;border-top:1px solid var(--line)}
+</style></head>
+<body><header><h1>RuleWhisper 数据 Wiki</h1>
+<div class="sub">结构化数据审查 · 数据更新时间 2026-07-11 21:24</div></header>
+<nav><a class="" href="weapons.html">武器</a><a class="" href="monsters.html">怪物</a><a class="" href="spells.html">法术</a><a class="active" href="skills.html">技能</a><a class="" href="rules.html">规则</a><a href="README.html">README</a><a href="https://github.com/AblazeGHR/RuleWhisper" target="_blank" style="font-weight:700;background:#e8f0fe;color:#1a73e8">⭐ GitHub</a></nav><main><div class="search"><input placeholder="按关键词过滤（名称/标签/机制…）" oninput="filterRows(this,'.skills')"></div><h2>技能表</h2><table class='skills mono'><thead><tr><th>名称</th><th>基础值</th></tr></thead><tbody><tr data-search='乔装 5'><td>乔装</td><td>5</td></tr><tr data-search='人类学 1'><td>人类学</td><td>1</td></tr><tr data-search='会计 5'><td>会计</td><td>5</td></tr><tr data-search='伪造 5'><td>伪造</td><td>5</td></tr><tr data-search='估价 5'><td>估价</td><td>5</td></tr><tr data-search='侦查 25'><td>侦查</td><td>25</td></tr><tr data-search='信用评级 0'><td>信用评级</td><td>0</td></tr><tr data-search='催眠 1'><td>催眠</td><td>1</td></tr><tr data-search='克苏鲁神话 0'><td>克苏鲁神话</td><td>0</td></tr><tr data-search='冲锋枪 15'><td>冲锋枪</td><td>15</td></tr><tr data-search='剑 20'><td>剑</td><td>20</td></tr><tr data-search='动物学 1'><td>动物学</td><td>1</td></tr><tr data-search='动物驯养 5'><td>动物驯养</td><td>5</td></tr><tr data-search='化学 1'><td>化学</td><td>1</td></tr><tr data-search='医学 1'><td>医学</td><td>1</td></tr><tr data-search='博物学 10'><td>博物学</td><td>10</td></tr><tr data-search='历史 5'><td>历史</td><td>5</td></tr><tr data-search='取悦 15'><td>取悦</td><td>15</td></tr><tr data-search='司法科学 1'><td>司法科学</td><td>1</td></tr><tr data-search='图书馆使用 20'><td>图书馆使用</td><td>20</td></tr><tr data-search='地质学 1'><td>地质学</td><td>1</td></tr><tr data-search='天文学 1'><td>天文学</td><td>1</td></tr><tr data-search='妙手 10'><td>妙手</td><td>10</td></tr><tr data-search='学识 1'><td>学识</td><td>1</td></tr><tr data-search='密码学 1'><td>密码学</td><td>1</td></tr><tr data-search='导航 10'><td>导航</td><td>10</td></tr><tr data-search='工程学 1'><td>工程学</td><td>1</td></tr><tr data-search='弓 15'><td>弓</td><td>15</td></tr><tr data-search='心理学 10'><td>心理学</td><td>10</td></tr><tr data-search='急救 30'><td>急救</td><td>30</td></tr><tr data-search='恐吓 15'><td>恐吓</td><td>15</td></tr><tr data-search='手枪 20'><td>手枪</td><td>20</td></tr><tr data-search='投掷 20'><td>投掷</td><td>20</td></tr><tr data-search='摄影 5'><td>摄影</td><td>5</td></tr><tr data-search='操作重型机械 1'><td>操作重型机械</td><td>1</td></tr><tr data-search='攀爬 20'><td>攀爬</td><td>20</td></tr><tr data-search='数学 10'><td>数学</td><td>10</td></tr><tr data-search='斗殴 25'><td>斗殴</td><td>25</td></tr><tr data-search='斧 15'><td>斧</td><td>15</td></tr><tr data-search='机枪 10'><td>机枪</td><td>10</td></tr><tr data-search='机械维修 10'><td>机械维修</td><td>10</td></tr><tr data-search='植物学 1'><td>植物学</td><td>1</td></tr><tr data-search='步枪 25'><td>步枪</td><td>25</td></tr><tr data-search='步枪/霰弹枪 25'><td>步枪/霰弹枪</td><td>25</td></tr><tr data-search='气象学 1'><td>气象学</td><td>1</td></tr><tr data-search='汽车驾驶 20'><td>汽车驾驶</td><td>20</td></tr><tr data-search='法律 5'><td>法律</td><td>5</td></tr><tr data-search='游泳 20'><td>游泳</td><td>20</td></tr><tr data-search='潜水 1'><td>潜水</td><td>1</td></tr><tr data-search='潜行 20'><td>潜行</td><td>20</td></tr><tr data-search='火焰喷射器 10'><td>火焰喷射器</td><td>10</td></tr><tr data-search='炮术 1'><td>炮术</td><td>1</td></tr><tr data-search='爆破 1'><td>爆破</td><td>1</td></tr><tr data-search='物理 1'><td>物理</td><td>1</td></tr><tr data-search='物理学 1'><td>物理学</td><td>1</td></tr><tr data-search='生存 10'><td>生存</td><td>10</td></tr><tr data-search='生物学 1'><td>生物学</td><td>1</td></tr><tr data-search='电子学 1'><td>电子学</td><td>1</td></tr><tr data-search='电气维修 10'><td>电气维修</td><td>10</td></tr><tr data-search='矛 20'><td>矛</td><td>20</td></tr><tr data-search='神秘学 5'><td>神秘学</td><td>5</td></tr><tr data-search='科学 1'><td>科学</td><td>1</td></tr><tr data-search='精神分析 1'><td>精神分析</td><td>1</td></tr><tr data-search='绞索 15'><td>绞索</td><td>15</td></tr><tr data-search='美术 5'><td>美术</td><td>5</td></tr><tr data-search='考古学 1'><td>考古学</td><td>1</td></tr><tr data-search='聆听 20'><td>聆听</td><td>20</td></tr><tr data-search='艺术与手艺 5'><td>艺术与手艺</td><td>5</td></tr><tr data-search='药学 1'><td>药学</td><td>1</td></tr><tr data-search='表演 5'><td>表演</td><td>5</td></tr><tr data-search='计算机使用 5'><td>计算机使用</td><td>5</td></tr><tr data-search='话术 5'><td>话术</td><td>5</td></tr><tr data-search='说服 10'><td>说服</td><td>10</td></tr><tr data-search='读唇 1'><td>读唇</td><td>1</td></tr><tr data-search='跳跃 20'><td>跳跃</td><td>20</td></tr><tr data-search='连枷 10'><td>连枷</td><td>10</td></tr><tr data-search='追踪 10'><td>追踪</td><td>10</td></tr><tr data-search='重武器 10'><td>重武器</td><td>10</td></tr><tr data-search='链锯 10'><td>链锯</td><td>10</td></tr><tr data-search='锁匠 1'><td>锁匠</td><td>1</td></tr><tr data-search='霰弹枪 25'><td>霰弹枪</td><td>25</td></tr><tr data-search='鞭 5'><td>鞭</td><td>5</td></tr><tr data-search='驾驶 1'><td>驾驶</td><td>1</td></tr><tr data-search='骑术 5'><td>骑术</td><td>5</td></tr></tbody></table>
+<script>
+function filterRows(input, scope){
+  var q = input.value.trim().toLowerCase();
+  var rows = document.querySelectorAll(scope+' tr[data-search]');
+  rows.forEach(function(r){
+    r.style.display = (!q || r.getAttribute('data-search').toLowerCase().indexOf(q)>=0) ? '' : 'none';
+  });
+}
+</script></main>
+<footer>由 docs/wiki/build.py 自动生成 · 纯静态，无依赖</footer></body></html>
