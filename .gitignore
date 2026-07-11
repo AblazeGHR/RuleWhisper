@@ -5,3 +5,4 @@ __pycache__/
 data/index.json
 data/ch14_raw.txt
 docs/wiki/**/*.html
+.wrangler/
