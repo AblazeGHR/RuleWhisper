@@ -105,7 +105,7 @@ def page(title, body, active, updated):
         f'<a class="{"active" if p == active else ""}" href="{p}.html">{labels[p]}</a>'
         for p in PAGES)
     nav_items += '<a href="README.html">README</a>' \
-                 '<a href="https://github.com/AblazeGHR/RuleWhisper" target="_blank" style="margin-left:auto;opacity:.7">GitHub ↗</a>'
+                 '<a href="https://github.com/AblazeGHR/RuleWhisper" target="_blank" style="font-weight:700;background:#e8f0fe;color:#1a73e8">⭐ GitHub</a>'
     return f"""<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
