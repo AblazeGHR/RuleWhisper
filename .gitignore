@@ -1,0 +1,5 @@
+.venv/
+*.pdf
+__pycache__/
+*.pyc
+data/index.json
