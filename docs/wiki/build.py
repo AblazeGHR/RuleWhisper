@@ -104,11 +104,13 @@ def page(title, body, active, updated):
     nav_items = "".join(
         f'<a class="{"active" if p == active else ""}" href="{p}.html">{labels[p]}</a>'
         for p in PAGES)
+    nav_items += '<a href="README.html">README</a>' \
+                 '<a href="https://github.com/AblazeGHR/RuleWhisper" target="_blank" style="margin-left:auto;opacity:.7">GitHub ↗</a>'
     return f"""<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{h(title)} · COC Wiki</title><style>{CSS}</style></head>
-<body><header><h1>COC 7th 数据 Wiki</h1>
+<title>{h(title)} · RuleWhisper Wiki</title><style>{CSS}</style></head>
+<body><header><h1>RuleWhisper 数据 Wiki</h1>
 <div class="sub">结构化数据审查 · 数据更新时间 {updated}</div></header>
 <nav>{nav_items}</nav><main>{body}</main>
 <footer>由 docs/wiki/build.py 自动生成 · 纯静态，无依赖</footer></body></html>"""
@@ -306,6 +308,20 @@ def main():
 
     # 分章规则页：data/rules/<key>.json -> rules/<key>.html
     import glob
+
+    # README.html
+    import markdown
+    readme_md = os.path.join(ROOT, "README.md")
+    if os.path.exists(readme_md):
+        with open(readme_md, encoding="utf-8") as f:
+            md_text = f.read()
+        md_text = md_text.replace("(docs/wiki/)", "(index.html)")
+        md_text = md_text.replace("(docs/PLAN.md)", "(https://github.com/AblazeGHR/RuleWhisper/blob/main/docs/PLAN.md)")
+        html_body = markdown.markdown(md_text, extensions=['tables', 'fenced_code'])
+        readme_html = page("README", html_body, "README", updated)
+        with open(os.path.join(OUT, "README.html"), "w", encoding="utf-8") as f:
+            f.write(readme_html)
+        print("build README.html")
     seen = set()
     for path in sorted(glob.glob(os.path.join(RULES_DIR, "*.json"))):
         key = os.path.splitext(os.path.basename(path))[0]
