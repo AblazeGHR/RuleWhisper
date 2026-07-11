@@ -4,4 +4,5 @@ __pycache__/
 *.pyc
 data/index.json
 data/ch14_raw.txt
+data/character.json
 docs/wiki/**/*.html
