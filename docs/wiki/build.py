@@ -46,6 +46,17 @@ def main():
     skills = load_list(os.path.join(DATA, "skills.json"))
     rules_all = load_list(os.path.join(DATA, "rules.json"))
 
+    # README 内容
+    import markdown
+    readme_html = ""
+    readme_md = os.path.join(ROOT, "README.md")
+    if os.path.exists(readme_md):
+        with open(readme_md, encoding="utf-8") as f:
+            md_text = f.read()
+        md_text = md_text.replace("(docs/wiki/)", "(#index)")
+        md_text = md_text.replace("(docs/PLAN.md)", "(https://github.com/AblazeGHR/RuleWhisper/blob/main/docs/PLAN.md)")
+        readme_html = markdown.markdown(md_text, extensions=['tables', 'fenced_code'])
+
     rules_modules = {}
     for key, path in sorted((os.path.splitext(os.path.basename(p))[0], p)
                             for p in glob.glob(os.path.join(RULES_DIR, "*.json"))):
@@ -56,7 +67,7 @@ def main():
     data = {
         "weapons": weapons, "monsters": monsters, "spells": spells,
         "skills": skills, "rules": rules_all, "rules_modules": rules_modules,
-        "updated": updated
+        "readme": readme_html, "updated": updated
     }
 
     os.makedirs(OUT, exist_ok=True)
@@ -268,7 +279,7 @@ var renderers={
   },
 
   readme:function(){
-    return'<h2>README</h2><div class="note">项目简介见 <a href="https://github.com/AblazeGHR/RuleWhisper" target="_blank">GitHub 仓库</a>。</div>';
+    return DATA.readme||'<div class="empty">README 内容加载失败</div>';
   }
 };
 

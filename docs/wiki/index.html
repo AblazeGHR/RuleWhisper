@@ -197,7 +197,7 @@ var renderers={
   },
 
   readme:function(){
-    return'<h2>README</h2><div class="note">项目简介见 <a href="https://github.com/AblazeGHR/RuleWhisper" target="_blank">GitHub 仓库</a>。</div>';
+    return DATA.readme||'<div class="empty">README 内容加载失败</div>';
   }
 };
 
