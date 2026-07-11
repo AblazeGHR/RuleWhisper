@@ -197,7 +197,10 @@ var renderers={
   },
 
   readme:function(){
-    return DATA.readme||'<div class="empty">README 内容加载失败</div>';
+    var s='<div id="readme-container" onclick="var t=event.target;if(t.tagName===\\'A\\'&&t.getAttribute(\\'href\\')&&t.getAttribute(\\'href\\').startsWith(\\'#\\')){event.preventDefault();var id=t.getAttribute(\\'href\\').slice(1);var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:\\'smooth\\'})}">';
+    s+=(DATA.readme||'<div class="empty">README 内容加载失败</div>');
+    s+='</div>';
+    return s;
   }
 };
 
