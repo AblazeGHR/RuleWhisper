@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""COC 全能跑团助手 — CLI entry point.
+"""RuleWhisper — CLI entry point.
 
 Usage:
   python src/cli.py rule <query>      搜索规则
@@ -92,7 +92,7 @@ COMMANDS = {
 
 def main():
     if len(sys.argv) < 2:
-        print("COC 全能跑团助手")
+        print("RuleWhisper — COC 全能跑团助手")
         print()
         print("可用命令:")
         print("  rule <关键词>     搜索规则全文")
