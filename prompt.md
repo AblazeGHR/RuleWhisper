@@ -53,8 +53,10 @@
 
 ## 执行方法
 
-1. Read `data/ch14_raw.txt` 逐块提取（每次 250-400 行）
-2. 每个怪物写入临时文件，合并入 `data/monsters.json`
+**重要：不要用正则/Python 脚本提取。** 已有的 monsters.json（正则提取）存在名称截断、括号拆散、野兽遗漏等问题。本次必须：
+
+1. **用 Read 工具读取 `data/ch14_raw.txt`**（每次 250-400 行），直接理解文本并写出 JSON
+2. 每个怪物写入临时文件，用下方的 Python 脚本去重合并入 `data/monsters.json`
 3. 每完成一个子章节 commit 一次
 4. commit 前校验：`python -c "import json;json.load(open('data/monsters.json','utf-8'))"`
 
