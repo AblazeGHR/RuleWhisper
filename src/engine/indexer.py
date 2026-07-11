@@ -127,20 +127,48 @@ class RuleIndex:
         query_words = [w.strip().lower() for w in jieba.lcut(query)
                        if len(w.strip()) >= 2 and w.strip() not in STOP_WORDS]
 
+        # Expand synonyms: add canonical forms for variant terms
+        expanded = []
+        for w in query_words:
+            expanded.append(w)
+            if w in SYNONYM_MAP:
+                expanded.extend(SYNONYM_MAP[w])
+
+        query_words = list(set(expanded))  # deduplicate
+
         if not query_words:
             return []
 
-        # Collect matching paragraph IDs with scores
-        scores: dict[int, float] = {}
+        # Collect matching paragraph IDs with raw TF-IDF scores
+        raw_scores: dict[int, float] = {}
         for w in query_words:
             matches = self._inverted.get(w, [])
             idf = max(1.0, len(self._paragraphs) / max(1, len(matches)))
             for pid in matches:
-                # TF: count occurrences of this word in the paragraph
                 tf = self._paragraphs[pid].text.lower().count(w)
-                scores[pid] = scores.get(pid, 0) + tf * idf
+                raw_scores[pid] = raw_scores.get(pid, 0) + tf * idf
 
-        # Sort by score descending
+        if not raw_scores:
+            return []
+
+        # Normalize scores to 0-100 scale
+        max_raw = max(raw_scores.values())
+        scores: dict[int, float] = {}
+        for pid, raw in raw_scores.items():
+            normalized = (raw / max_raw) * 100.0 if max_raw > 0 else 0
+            scores[pid] = normalized
+
+            # Bonus 1: structural data pages get +15
+            page = self._paragraphs[pid].page
+            if page in STRUCTURAL_DATA_PAGES:
+                scores[pid] += 15
+
+            # Bonus 2: query word appears in first 60 chars (likely title/lead) → +10
+            text_head = self._paragraphs[pid].text[:60].lower()
+            if any(w in text_head for w in query_words):
+                scores[pid] += 10
+
+        # Sort by adjusted score descending
         ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:top_k]
 
         return [IndexEntry(
@@ -148,7 +176,7 @@ class RuleIndex:
             chapter=self._paragraphs[pid].chapter,
             text=self._paragraphs[pid].text,
             lineno=self._paragraphs[pid].lineno,
-            score=round(score, 2),
+            score=round(score, 1),
         ) for pid, score in ranked]
 
     def save(self, filepath: str = INDEX_FILE):
@@ -185,6 +213,34 @@ class RuleIndex:
         print(f"Loaded index: {len(idx._paragraphs)} paragraphs, {len(idx._inverted)} terms", flush=True)
         return idx
 
+
+# Synonym map: query variant → canonical term (expands query to match more content)
+SYNONYM_MAP: dict[str, list[str]] = {
+    "散弹枪": ["霰弹枪"],
+    "hp": ["生命值"],
+    "san": ["理智值", "理智"],
+    "mp": ["魔法值"],
+    "db": ["伤害加值"],
+    "build": ["体格"],
+    "mov": ["移动"],
+    "kp": ["守秘人"],
+    "pc": ["调查员"],
+    "pl": ["玩家"],
+    "npc": [],
+    "6版": ["六版"],
+    "7版": ["七版"],
+    "跑团": [],
+    "coc": [],
+}
+
+# Pages containing structured game data tables (weapons, monsters, spells, sanity)
+# These get a ranking boost to appear before narrative mentions
+STRUCTURAL_DATA_PAGES = set()
+for p in range(372, 383): STRUCTURAL_DATA_PAGES.add(p)  # weapon tables
+for p in range(240, 312): STRUCTURAL_DATA_PAGES.add(p)  # monster stats
+for p in range(205, 230): STRUCTURAL_DATA_PAGES.add(p)  # spell lists
+for p in range(130, 143): STRUCTURAL_DATA_PAGES.add(p)  # sanity rules
+for p in range(387, 390): STRUCTURAL_DATA_PAGES.add(p)  # sanity tables
 
 STOP_WORDS = {
     "的", "了", "在", "是", "我", "有", "和", "就", "不", "人", "都", "一", "一个",
