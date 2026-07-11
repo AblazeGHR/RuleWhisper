@@ -144,10 +144,22 @@
 ## 当前工作树状态
 
 ```
-d:/project/ai_coc_p3/        ← 你在这里
+d:/project/ai_coc_p3/        ← 你在这里（分支 p3-rule-extract）
 ├── data/
 │   ├── 守秘人规则书.txt      ← 1.5MB 规则书全文
-│   ├── rules.json            ← 提取结果（当前 169 条，全部 8 章已完成）
+│   ├── rules.json            ← 合并视图（单一事实来源，当前 191 条，带 模块 字段）
+│   ├── rules/                ← 按模块拆分（由 build.py 生成，勿手改）
+│   │   ├── build.py          ← 模块化构建脚本（补 模块 字段 + 拆分）
+│   │   ├── character_creation.json  (创建调查员 19)
+│   │   ├── skills.json             (技能 10)
+│   │   ├── game_system.json        (游戏系统 20)
+│   │   ├── interlude.json          (幕间成长 4)
+│   │   ├── combat.json             (战斗 42)
+│   │   ├── chase.json              (追逐 30)
+│   │   ├── sanity.json             (理智 29)
+│   │   ├── magic.json              (魔法 20)
+│   │   ├── keeper.json             (主持游戏 9)
+│   │   └── appendix.json           (附录 8)
 │   └── weapons.json          ← P2 武器数据（已有，无关本轮任务）
 ├── prompts/                  ← 创建此目录存放 prompt
 └── src/                      ← 现有引擎代码
@@ -158,22 +170,24 @@ d:/project/ai_coc_p3/        ← 你在这里
 > 工作树：`d:/project/ai_coc_p3`，分支 `p3-rule-extract`，请勿窜到其他工作树。
 > 用户指令：自主持续工作，决策点前 commit；如有问题用户自行回滚。
 
-### 已完成章节（合计 169 条，HEAD = `4d8860e`）
+### 已完成章节（合计 191 条，HEAD = `2fd666d`）
 
 | 章节 | TXT 页码 | 条数 | commit | 备注 |
 |------|----------|------|--------|------|
-| 第八章 理智 | 130-143 | 17 | `67c1c9c` | 由用户提交版本（`sanity_check_basic` 等 17 条），**保留此版本**，不要用自己的版本覆盖 |
+| 第八章 理智 | 130-143 | 29 | `67c1c9c` + `2fd666d` | 用户版 17 条 + 补遗 12 条（疯狂发作/表VII·VIII/现实认知/恢复/表IX·X 等） |
 | 第六章 战斗 | 86-111 | 42 | `959cab7` | `combat_round_structure`/`melee_opposed_check`/`extreme_success_impale`/`armor_damage_reduction`/`major_wound_effect` 等 |
-| 第五章 游戏系统 | 72-85 | 24 | `8cf0379` | `skill_check_definition`/`push_check`/`bonus_penalty_dice`/`critical_success_fumble` 等 |
+| 第五章 游戏系统 | 72-85 | 20 | `8cf0379` | 其中 4 条划入"幕间成长"模块 |
 | 第七章 追逐 | 112-129 | 30 | `7224fa5` | `action_points`/`chase_hazards`/`breaking_obstacles`/`table_v_vehicles` 等 |
-| 第四章 技能 | 44-70 | 10 | `491fe74` | `skill_difficulty_thresholds`/`combined_skill_check`(与Ch5重复已去重)/`dodge_half_dex`/`transferable_skill_advantage` 等 |
-| 第三章 创建调查员 | 24-43 | 18 | `ddcb168` | `attribute_rolling`/`health_points_formula`/`damage_bonus_build_table`/`movement_mov`/`age_modifiers` 等 |
-| 第九章 魔法 | 144-152 | 20 | `b394cd5` | `spellbook_reading_check`/`cmi_cmf_sanity`/`cast_spell_first_check`/`cast_spell_push`/`becoming_believer` 等 |
-| 第十六章 附录 | 356-392 | 8 | `4d8860e` | `death_single_exceed_max_hp`/`outnumbered_bonus_die`/`point_blank_bonus_die`/`attribute_check_multiplier` 等 |
+| 第四章 技能 | 44-70 | 10 | `491fe74` | `skill_difficulty_thresholds`/`dodge_half_dex`/`transferable_skill_advantage` 等 |
+| 第三章 创建调查员 | 24-43 | 19 | `ddcb168` + `2fd666d` | +1 条（表II 现金与资产） |
+| 第九章 魔法 | 144-152 | 20 | `b394cd5` | `spellbook_reading_check`/`cast_spell_push`/`becoming_believer` 等 |
+| 第十章 主持游戏 | 153-175 | 9 | `2fd666d` | 新增章节：灵感检定/NPC幸运池/洞察·线索/使用规则·房规 |
+| 第十六章 附录 | 356-392 | 8 | `4d8860e` | `death_single_exceed_max_hp`/`outnumbered_bonus_die` 等 |
 
-**全部 8 章已提取完成，验收标准（60-100 条、可按标签检索、JSON 可解析）已远超。**
+**全部 9 章已提取完成（含原 8 章 + 第十章主持游戏），合计 191 条，验收标准远超限值。**
 
-> 说明：第十六章附录主体为术语表（多为前章规则的重述）与物价/武器价格表（武器价格已由 P2 `weapons.json` 覆盖），故仅提取 8 条该章**独有**的机械规则；恐惧/躁狂症状表（表IX/表X）实际位于第八章理智范围内（lines 9231/9380），不属于附录页范围。
+> 说明：第十六章附录主体为术语表与物价/武器价格表（已由 P2 `weapons.json` 覆盖），故仅提取 8 条该章**独有**机械规则；恐惧/躁狂症状表（表IX/表X）实际位于第八章理智范围内（lines 9231/9380）。
+> 第十一章~第十四章（法术/神话典籍/怪物/外星科技）为**数据型词条**，按用户决定不收录（与 P2 `weapons.json` 同属数据层）。
 
 ### 提取方法论（每章统一流程）
 
@@ -194,16 +208,41 @@ d:/project/ai_coc_p3/        ← 你在这里
 6. `git add data/rules.json && git commit -m "feat(P3): LLM rule extraction - Chapter X ..."`
 7. **注意**：可能存在并行提交者（用户/进程）会先提交合并结果。若 `git commit` 报 `nothing to commit`，先 `git log` 确认 HEAD 是否已含本次合并，再决定是否需要重做。
 
+### 模块化组织（按用户要求：幕间与战斗等分开收录）
+
+> Task #7 已完成。规则按"模块"分类，既保留合并视图 `data/rules.json`（单一事实来源），又拆分为 `data/rules/<module>.json` 便于按主题检索/维护。
+
+**模块划分（字段 `模块` 值 / 文件名 key / 来源）：**
+
+| 模块 | 文件 | 条数 | 来源 |
+|------|------|------|------|
+| 创建调查员 | `character_creation.json` | 19 | 第三章 |
+| 技能 | `skills.json` | 10 | 第四章 |
+| 游戏系统 | `game_system.json` | 20 | 第五章（核心检定系统） |
+| 幕间成长 | `interlude.json` | 4 | 第五章中"幕间/技能增长/背景演变"：`interlude_growth`/`modify_background`/`interlude_employment_cr`/`training` |
+| 战斗 | `combat.json` | 42 | 第六章 |
+| 追逐 | `chase.json` | 30 | 第七章 |
+| 理智 | `sanity.json` | 29 | 第八章 |
+| 魔法 | `magic.json` | 20 | 第九章 |
+| 主持游戏 | `keeper.json` | 9 | 第十章 |
+| 附录 | `appendix.json` | 8 | 第十六章 |
+
+**构建方式：** `data/rules/build.py` 读取 `rules.json`，按 `章节` 补 `模块` 字段（少数 Ch5 规则覆盖到 `幕间成长`），回写合并视图，再拆分输出各模块文件。**新增/修改规则只需编辑 `rules.json` 后重跑 `python data/rules/build.py`**，勿手改模块文件。
+
+```bash
+python data/rules/build.py
+# 校验
+python -c "import json,glob,os; [json.load(open(f,encoding='utf-8')) for f in glob.glob('data/rules/*.json')]; print('OK')"
+```
+
 ### 待提取章节（按优先级）
 
-> ✅ 全部 8 章已提取完成（见上表）。无需再提取。
+> ✅ 全部 9 章已提取完成（原 8 章 + 第十章主持游戏）。无需再提取规则条目。
 
 | 优先级 | 章节 | TXT 页码 | 状态 |
 |--------|------|----------|------|
-| 5 | 第四章 技能 | 44-70 | ✅ 已完成 (`491fe74`) |
-| 6 | 第三章 创建调查员 | 24-43 | ✅ 已完成 (`ddcb168`) |
-| 7 | 第九章 魔法 | 144-152 | ✅ 已完成 (`b394cd5`) |
-| 8 | 第十六章 附录 | 356-392 | ✅ 已完成 (`4d8860e`) |
+| 9 | 第十章 主持游戏 | 153-175 | ✅ 已完成 (`2fd666d`) |
+| — | 第十一章~十四章（法术/典籍/怪物/科技） | — | ⏭️ 用户决定不收录（数据型词条，同 P2 数据层） |
 
 ### 待确认事项
 
