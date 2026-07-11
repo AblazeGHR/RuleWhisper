@@ -5,3 +5,8 @@ __pycache__/
 data/index.json
 data/ch14_raw.txt
 docs/wiki/**/*.html
+# User house-rule versions (v1.0 baseline is committed)
+data/versions/v[2-9]*/
+data/versions/v[1-9][0-9]*/
+# Exported version files
+*_export.json
