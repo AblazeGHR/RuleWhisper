@@ -1,6 +1,7 @@
-name = "coc-wiki"
-compatibility_date = "2025-01-01"
+name = "rule-whisper"
+compatibility_date = "2026-07-11"
 main = "worker.js"
 
 [assets]
 directory = "./docs/wiki"   # wiki 在仓库的 docs/wiki 子目录下
+binding = "ASSETS"
