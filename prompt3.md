@@ -48,13 +48,25 @@ with open('data/ch12_raw.txt', 'w', encoding='utf-8') as f:
 
 ## 执行方法
 
-**重要：不要写 Python/正则提取脚本。** 现有 spells.json 只有 24 条就是因为正则提取不可靠（法术格式多变、多行断裂）。提取流程是：
+**核心原则：你（LLM）是人类，不是脚本。** 你必须亲自阅读文本、理解每一个法术的内容、手动写出 JSON。不要试图让 Python 替你理解文本——正则做不到这件事，旧的 spells.json（24 条，大量遗漏）就是正则失败的证明。
 
-1. 生成 `data/ch12_raw.txt`（一行 Python）
-2. **用 Read 工具读取文本片段**（每次 250-400 行），直接理解并写出 JSON
-3. 每组法术写出后，用 Python 去重合并回 `data/spells.json`
-4. 每完成一个法术类别 commit 一次
-5. 校验：`python -c "import json;json.load(open('data/spells.json','utf-8'))"`
+**允许使用脚本的地方（仅限以下）：**
+- 从完整规则书中截取第十二章文本 → 上面那行 Python（一次执行）
+- 将你写好的临时 JSON 合并到 `data/spells.json` → 下面那行 Python
+- 校验 JSON 格式 → `python -c`
+
+**禁止使用脚本的地方：**
+- 绝对不要写正则或 Python 程序从文本中自动提取法术
+- 不要试图用 split/regex/findall 解析法术名、消耗、效果
+
+**正确流程：**
+
+1. 生成 `data/ch12_raw.txt`（一行 Python，仅文件截取）
+2. **用 Read 工具读取文本片段**（每次 250-400 行），你亲自阅读法术语的段落
+3. 你亲自判断每条法术的名称、消耗、施法用时和效果，手动写出 JSON 到临时文件
+4. 每组法术写出后，用 Python 去重合并回 `data/spells.json`
+5. 每完成一个法术类别 commit 一次
+6. 校验：`python -c "import json;json.load(open('data/spells.json','utf-8'))"`
 
 合并脚本同怪物提取：
 ```python
