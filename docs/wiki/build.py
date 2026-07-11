@@ -1,85 +1,100 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Wiki 可视化数据审查工具。
-
-读取 data/ 下的结构化 JSON（武器/怪物/法术/技能/规则及其分章文件），
-生成零依赖、单文件自包含的静态 HTML 到 docs/wiki/，供人眼审查数据质量。
-
-运行：python docs/wiki/build.py
-"""
-import json
-import os
+"""RuleWhisper Wiki — SPA 构建器。只生成 index.html + data.json。"""
+import json, os, glob
 from datetime import datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(os.path.dirname(HERE))          # 项目根 = d:/.../ai_coc_wiki
+ROOT = os.path.dirname(os.path.dirname(HERE))
 DATA = os.path.join(ROOT, "data")
 RULES_DIR = os.path.join(DATA, "rules")
-OUT = HERE                                         # docs/wiki
-OUT_RULES = os.path.join(OUT, "rules")
+OUT = HERE
 
 PAGES = ["weapons", "monsters", "spells", "skills", "rules"]
+LABELS = {"weapons": "武器", "monsters": "怪物", "spells": "法术",
+          "skills": "技能", "rules": "规则"}
 
-
-# ------------------------------------------------------------------ 工具
-def h(text):
-    """HTML 转义。"""
-    if text is None:
-        return ""
-    s = str(text)
-    return (s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            .replace('"', "&quot;"))
-
-
-def load(path):
-    try:
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return None
-
+MODULE_KEY = {
+    "创建调查员": "character_creation", "技能": "skills", "游戏系统": "game_system",
+    "幕间成长": "interlude", "战斗": "combat", "追逐": "chase", "理智": "sanity",
+    "魔法": "magic", "主持游戏": "keeper", "附录": "appendix",
+}
 
 def load_list(path):
-    d = load(path)
-    return d if isinstance(d, list) else []
-
+    try:
+        with open(path, encoding="utf-8") as f:
+            d = json.load(f)
+        return d if isinstance(d, list) else []
+    except:
+        return []
 
 def data_mtime():
-    """数据最新修改时间，用于在首页标注更新时间。"""
     latest = 0.0
-    for base, _, files in os.walk(DATA):
-        for fn in files:
+    for b, _, fs in os.walk(DATA):
+        for fn in fs:
             if fn.endswith(".json"):
-                latest = max(latest, os.path.getmtime(os.path.join(base, fn)))
+                latest = max(latest, os.path.getmtime(os.path.join(b, fn)))
     return datetime.fromtimestamp(latest) if latest else datetime.now()
 
+def main():
+    updated = data_mtime().strftime("%Y-%m-%d %H:%M")
 
-# ------------------------------------------------------------------ 模板
-CSS = """
+    # 收集数据
+    weapons = load_list(os.path.join(DATA, "weapons.json"))
+    monsters = load_list(os.path.join(DATA, "monsters.json"))
+    spells = load_list(os.path.join(DATA, "spells.json"))
+    skills = load_list(os.path.join(DATA, "skills.json"))
+    rules_all = load_list(os.path.join(DATA, "rules.json"))
+
+    rules_modules = {}
+    for key, path in sorted((os.path.splitext(os.path.basename(p))[0], p)
+                            for p in glob.glob(os.path.join(RULES_DIR, "*.json"))):
+        items = load_list(path)
+        if items:
+            rules_modules[key] = items
+
+    data = {
+        "weapons": weapons, "monsters": monsters, "spells": spells,
+        "skills": skills, "rules": rules_all, "rules_modules": rules_modules,
+        "updated": updated
+    }
+
+    os.makedirs(OUT, exist_ok=True)
+    with open(os.path.join(OUT, "data.json"), "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False)
+
+    # SPA HTML — 纯前端渲染
+    html = HTML_TEMPLATE.replace("{{UPDATED}}", updated)
+    with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"SPA built: weapons({len(weapons)}) monsters({len(monsters)}) spells({len(spells)}) skills({len(skills)}) rules({len(rules_all)})")
+
+HTML_TEMPLATE = r"""<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RuleWhisper Wiki</title>
+<style>
 :root{--bg:#f7f7f4;--fg:#1f2328;--muted:#6b7280;--line:#e3e3df;
 --accent:#7c2d12;--accent2:#92400e;--card:#fff;--tag:#eef2f7;--tagfg:#334155}
 *{box-sizing:border-box}
-body{margin:0;font:14px/1.6 -apple-system,Segoe UI,Roboto,"Microsoft YaHei",sans-serif;
-background:var(--bg);color:var(--fg)}
+body{margin:0;font:14px/1.6 -apple-system,Segoe UI,Roboto,"Microsoft YaHei",sans-serif;background:var(--bg);color:var(--fg)}
 header{background:var(--accent);color:#fff;padding:14px 22px}
 header h1{margin:0;font-size:18px}
 header .sub{opacity:.85;font-size:12px;margin-top:2px}
-nav{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);
-display:flex;flex-wrap:wrap;gap:4px;padding:8px 22px}
-nav a{text-decoration:none;color:var(--fg);padding:5px 12px;border-radius:6px;font-size:13px}
+nav{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:4px;padding:8px 22px}
+nav a{text-decoration:none;color:var(--fg);padding:5px 12px;border-radius:6px;font-size:13px;cursor:pointer}
 nav a:hover{background:var(--tag)}
 nav a.active{background:var(--accent);color:#fff}
 main{padding:18px 22px;max-width:1180px;margin:0 auto}
 h2{font-size:16px;margin:22px 0 10px;color:var(--accent2)}
-table{border-collapse:collapse;width:100%;background:var(--card);margin:8px 0 18px;
-font-size:13px}
+table{border-collapse:collapse;width:100%;background:var(--card);margin:8px 0 18px;font-size:13px}
 th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
 th{background:#f0efe9;font-weight:600;white-space:nowrap}
 tr:nth-child(even) td{background:#fafaf8}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-details{border:1px solid var(--line);border-radius:8px;background:var(--card);
-margin:10px 0;overflow:hidden}
+details{border:1px solid var(--line);border-radius:8px;background:var(--card);margin:10px 0;overflow:hidden}
 summary{cursor:pointer;padding:10px 14px;font-weight:600;background:#f0efe9;list-style:none}
 summary::-webkit-details-marker{display:none}
 summary .cnt{color:var(--muted);font-weight:400;margin-left:6px}
@@ -90,362 +105,179 @@ summary .cnt{color:var(--muted);font-weight:400;margin-left:6px}
 .kv{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 14px;font-size:12.5px}
 .kv b{color:var(--muted);font-weight:500}
 .card .row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 0;font-size:12.5px}
-.tag{display:inline-block;background:var(--tag);color:var(--tagfg);border-radius:4px;
-padding:1px 7px;font-size:11.5px;margin:1px}
+.tag{display:inline-block;background:var(--tag);color:var(--tagfg);border-radius:4px;padding:1px 7px;font-size:11.5px;margin:1px}
 .search{position:sticky;top:46px;z-index:4;background:var(--bg);padding:8px 0 12px}
-.search input{width:100%;max-width:420px;padding:7px 11px;border:1px solid var(--line);
-border-radius:7px;font-size:13px}
+.search input{width:100%;max-width:420px;padding:7px 11px;border:1px solid var(--line);border-radius:7px;font-size:13px}
 .note{color:var(--muted);font-size:12px;margin:4px 0 14px}
 .scroll{overflow-x:auto}
+.empty{color:var(--muted);padding:30px;text-align:center}
+footer{color:var(--muted);font-size:12px;padding:14px 22px;border-top:1px solid var(--line)}
 .mini{border:1px solid var(--line);margin:4px 0;font-size:12px;width:auto}
 .mini th,.mini td{border:1px solid var(--line);padding:2px 6px}
 .mini th{background:#f0efe9;font-weight:600}
-.empty{color:var(--muted);padding:30px;text-align:center}
-footer{color:var(--muted);font-size:12px;padding:14px 22px;border-top:1px solid var(--line)}
-/* 性能优化 */
-table,.cards{content-visibility:auto;contain-intrinsic-size:auto 500px}
-"""
-
-def page(title, body, active, updated):
-    nav_items = "".join(
-        f'<a class="{"active" if p == active else ""}" href="{p}.html">{labels[p]}</a>'
-        for p in PAGES)
-    nav_items += '<a href="README.html">README</a>' \
-                 '<a href="https://github.com/AblazeGHR/RuleWhisper" target="_blank" style="font-weight:700;background:#e8f0fe;color:#1a73e8">⭐ GitHub</a>'
-    return f"""<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-{''.join(f'<link rel="prefetch" as="document" href="{p}.html">' for p in PAGES)}
-<link rel="prefetch" as="document" href="README.html">
-<title>{h(title)} · RuleWhisper Wiki</title><style>{CSS}</style></head>
-<body><header><h1>RuleWhisper 数据 Wiki</h1>
-<div class="sub">结构化数据审查 · 数据更新时间 {updated}</div></header>
-<nav>{nav_items}</nav><main>{body}</main>
-<footer>由 docs/wiki/build.py 自动生成 · 纯静态，无依赖</footer></body></html>"""
-
-labels = {"weapons": "武器", "monsters": "怪物", "spells": "法术",
-          "skills": "技能", "rules": "规则"}
-
-JS_FILTER = """
+blockquote{border-left:3px solid var(--line);margin:6px 0;padding:4px 12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header><h1>RuleWhisper 数据 Wiki</h1><div class="sub">结构化数据审查 · 更新 {{UPDATED}}</div></header>
+<nav id="nav"></nav>
+<main id="content"><div class="empty">加载中…</div></main>
+<footer>由 docs/wiki/build.py 构建 · SPA 纯前端渲染</footer>
 <script>
-function filterRows(input, scope){
-  var q = input.value.trim().toLowerCase();
-  var rows = document.querySelectorAll(scope+' tr[data-search]');
-  rows.forEach(function(r){
-    r.style.display = (!q || r.getAttribute('data-search').toLowerCase().indexOf(q)>=0) ? '' : 'none';
-  });
-}
-</script>"""
+var PAGE = location.hash.slice(1)||'index';
+var LABELS = {weapons:'武器',monsters:'怪物',spells:'法术',skills:'技能',rules:'规则'};
+var PAGES = ['weapons','monsters','spells','skills','rules'];
 
-def search_box(scope):
-    return (f'<div class="search"><input placeholder="按关键词过滤（名称/标签/机制…）" '
-            f'oninput="filterRows(this,\'{scope}\')"></div>')
+function h(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
-
-# ------------------------------------------------------------------ 各页面
-def weapons_page():
-    rows = load_list(os.path.join(DATA, "weapons.json"))
-    if not rows:
-        return None, 0
-    groups = {}
-    for r in rows:
-        groups.setdefault(r.get("类别", "未分类"), []).append(r)
-    cols = [("名称", "名称"), ("技能", "技能"), ("伤害", "伤害"),
-            ("基础射程", "射程"), ("每轮", "每轮"), ("装弹量", "装弹量"),
-            ("价格", "价格"), ("故障值", "故障值"), ("贯穿", "贯穿"), ("时代", "时代")]
-    body = "<h2>武器总览</h2><div class='note'>按「类别」折叠，点击分组标题展开/收起。</div>"
-    for cat in sorted(groups):
-        items = groups[cat]
-        body += f"<details open><summary>{h(cat)}<span class='cnt'>{len(items)} 件</span></summary>"
-        body += "<table class='mono'><thead><tr>" + "".join(
-            f"<th>{h(c)}</th>" for _, c in cols) + "</tr></thead><tbody>"
-        for r in items:
-            body += "<tr>" + "".join(f"<td>{h(r.get(k,''))}</td>" for k, _ in cols) + "</tr>"
-        body += "</tbody></table></details>"
-    return body, len(rows)
-
-
-def monsters_page():
-    rows = load_list(os.path.join(DATA, "monsters.json"))
-    if not rows:
-        return None, 0
-    groups = {}
-    for r in rows:
-        groups.setdefault(r.get("分类", "未分类"), []).append(r)
-    body = search_box(".monsters") + "<h2>怪物卡</h2>" \
-           "<div class='note'>按「分类」折叠，点击分组标题展开/收起；顶部可关键词过滤。</div>"
-    for cat in sorted(groups):
-        items = groups[cat]
-        body += f"<details open><summary>{h(cat)}<span class='cnt'>{len(items)} 只</span></summary>" \
-                "<div class='cards'>"
-        for r in items:
-            body += monster_card(r)
-        body += "</div></details>"
-    body += JS_FILTER
-    return body, len(rows)
-
-
-def monster_card(r):
-    name = h(r.get("名称", ""))
-    aka = h(r.get("别名", ""))
-    attrs = r.get("属性", {}) or {}
-    dice = r.get("掷骰", {}) or {}
-    kv = "".join(
-        f"<span><b>{k}</b> {h(attrs.get(k,'') or '—')}"
-        + (f" <i>({h(dice.get(k,''))})</i>" if dice.get(k) else "") + "</span>"
-        for k in ("STR", "CON", "SIZ", "DEX", "INT", "POW"))
-    kv += "".join(
-        f"<span><b>{k}</b> {h(r.get(k,'') or '—')}</span>"
-        for k in ("HP", "魔法值", "伤害加值", "体格", "移动", "每回合攻击"))
-    card = f"<div class='card' data-search='{h(monster_search(r))}'><h3>{name}</h3>"
-    if aka:
-        card += f"<div class='aka'>别名：{aka}</div>"
-    card += f"<div class='tag' style='margin-bottom:6px'>{h(r.get('分类',''))}</div>"
-    card += "<div class='kv'>" + kv + "</div>"
-    g = r.get("格斗")
-    if g is not None:
-        card += f"<div class='row'><span><b>格斗</b> {h(g)}%</span>" \
-                f"<span><b>伤害</b> {h(r.get('格斗_伤害',''))}</span></div>"
-    d = r.get("闪避")
-    if d is not None:
-        card += f"<div class='row'><span><b>闪避</b> {h(d)}%</span></div>"
-    card += f"<div class='row'><span><b>护甲</b> {h(r.get('护甲',''))}</span></div>"
-    for fld in ("技能", "战斗方式", "法术", "特殊能力", "理智损失"):
-        v = r.get(fld)
-        if isinstance(v, list):
-            if v:
-                card += f"<div class='row'><span><b>{fld}</b></span></div>" \
-                        "<div class='row'><ol style='margin:2px 0;padding-left:18px'>" + \
-                        "".join(f"<li>{h(x)}</li>" for x in v) + "</ol></div>"
-        elif v not in (None, "", "无。"):
-            card += f"<div class='row'><span><b>{fld}</b> {h(v)}</span></div>"
-    src = r.get("来源章节")
-    if src:
-        card += f"<div class='row'><span class='tag'>{h(src)}</span>" \
-                f"<span class='tag'>{h(r.get('id',''))}</span></div>"
-    card += "</div>"
-    return card
-
-
-def monster_search(r):
-    def part(v):
-        if v is None or v == "":
-            return ""
-        if isinstance(v, list):
-            return " ".join(str(x) for x in v)
-        return str(v)
-    s = " ".join(part(r.get(k)) for k in
-                 ("名称", "别名", "分类", "技能", "战斗方式", "法术", "特殊能力", "理智损失", "来源章节", "id"))
-    s += " " + " ".join(part(v) for v in (r.get("属性", {}) or {}).values())
-    return s
-
-
-def spells_page():
-    rows = load_list(os.path.join(DATA, "spells.json"))
-    if not rows:
-        return None, 0
-    body = search_box(".spells") + "<h2>法术列表</h2><table class='spells mono'><thead><tr>" \
-           "<th>名称</th><th>消耗</th><th>施法用时</th></tr></thead><tbody>"
-    for r in rows:
-        s = f"{r.get('名称','')} {r.get('消耗','')} {r.get('施法用时','')}"
-        body += f"<tr data-search='{h(s)}'><td>{h(r.get('名称',''))}</td>" \
-                f"<td>{h(r.get('消耗',''))}</td><td>{h(r.get('施法用时',''))}</td></tr>"
-    body += "</tbody></table>" + JS_FILTER
-    return body, len(rows)
-
-
-def skills_page():
-    rows = load_list(os.path.join(DATA, "skills.json"))
-    if not rows:
-        return None, 0
-    body = search_box(".skills") + "<h2>技能表</h2><table class='skills mono'>" \
-           "<thead><tr><th>名称</th><th>基础值</th></tr></thead><tbody>"
-    for r in rows:
-        s = f"{r.get('名称','')} {r.get('基础值','')}"
-        body += f"<tr data-search='{h(s)}'><td>{h(r.get('名称',''))}</td>" \
-                f"<td>{h(r.get('基础值',''))}</td></tr>"
-    body += "</tbody></table>" + JS_FILTER
-    return body, len(rows)
-
-
-def fmt_val(v):
-    """把规则字段值渲染为 HTML：列表→顿号连接，其余→转义文本。"""
-    if isinstance(v, list):
-        return h("、".join(str(x) for x in v))
-    return h(v)
-
-
-def fmt_table(val):
-    """把规则里的 数值/参考表/症状表 渲染为嵌套小表格、有序列表或键值表。"""
-    if not val:
-        return ""
-    if isinstance(val, dict):
-        rows = "".join(
-            f"<tr><th style='text-align:left'>{h(k)}</th><td>{fmt_val(v)}</td></tr>"
-            for k, v in val.items())
-        return f"<table class='mini'><tbody>{rows}</tbody></table>"
-    if isinstance(val, list):
-        if val and isinstance(val[0], dict):
-            keys = list(val[0].keys())
-            head = "".join(f"<th>{h(k)}</th>" for k in keys)
-            rows = "".join(
-                "<tr>" + "".join(f"<td>{h(d.get(k,''))}</td>" for k in keys) + "</tr>"
-                for d in val)
-            return f"<table class='mini'><thead><tr>{head}</tr></thead><tbody>{rows}</tbody></table>"
-        return "<ol style='margin:2px 0;padding-left:18px'>" + \
-            "".join(f"<li>{h(x)}</li>" for x in val) + "</ol>"
-    return h(val)
-
-
-def rule_row(r):
-    s = " ".join(str(r.get(k, "")) for k in
-                 ("id", "触发条件", "机制效果", "原文引用", "说明")) \
-        + " " + " ".join(r.get("相关检定", [])) \
-        + " " + " ".join(r.get("标签", []))
-    tags = "".join(f"<span class='tag'>{h(t)}</span>" for t in r.get("标签", []))
-    flow = r.get("判定流程")
-    flow = "".join(f"<li>{h(x)}</li>" for x in flow) if isinstance(flow, list) else h(flow)
-    mech = h(r.get("机制效果", ""))
-    if r.get("特殊规则"):
-        mech += f" <br><i>特殊：{h(r.get('特殊规则'))}</i>"
-    if r.get("说明"):
-        mech += f" <br><i>说明：{h(r.get('说明'))}</i>"
-    if r.get("原文引用"):
-        mech += f" <br><blockquote style='margin:4px 0;color:var(--muted)'>“{h(r.get('原文引用'))}”</blockquote>"
-    extra = fmt_table(r.get("参考表")) + fmt_table(r.get("症状表"))
-    cells = [
-        f"<td class='mono'>{h(r.get('id',''))}</td>",
-        f"<td>{tags or h(r.get('章节',''))}</td>",
-        f"<td>{h(r.get('触发条件',''))}</td>",
-        f"<td>{mech}</td>",
-        f"<td>{h('、'.join(r.get('相关检定', [])))}</td>",
-        f"<td><ol style='margin:0;padding-left:18px'>{flow}</ol></td>",
-        f"<td>{extra}</td>",
-        f"<td>{fmt_table(r.get('数值')) or ''}</td>",
-        f"<td class='mono'>{h(r.get('页码',''))}</td>",
-    ]
-    return f"<tr data-search='{h(s)}'>" + "".join(cells) + "</tr>"
-
-
-RULE_HEAD = ("<th>id</th><th>标签</th><th>触发条件</th><th>机制效果</th>"
-             "<th>相关检定</th><th>判定流程</th><th>参考/症状表</th><th>数值</th><th>页</th>")
-
-
-def rules_module_page(key, items):
-    body = search_box(f".mod-{key}") + f"<h2>{h(key)} 模块（{len(items)} 条）</h2>"
-    body += f"<div class='scroll'><table class='mod-{key} mono'><thead><tr>{RULE_HEAD}</tr></thead><tbody>"
-    for r in items:
-        body += rule_row(r)
-    body += "</tbody></table></div>" + JS_FILTER
-    return body
-
-
-def rules_index_page():
-    rules = load_list(os.path.join(DATA, "rules.json"))
-    if not rules:
-        return None, 0
-    groups = {}
-    for r in rules:
-        groups.setdefault(r.get("模块", "未分类"), []).append(r)
-    body = "<h2>规则索引</h2><div class='note'>按模块分组，点击分组展开查看条目；"
-    body += "右侧各模块页提供标签检索。</div>"
-    for mod in sorted(groups):
-        items = groups[mod]
-        body += f"<details><summary>{h(mod)}<span class='cnt'>{len(items)} 条</span></summary>"
-        body += "<table class='mono'><thead><tr><th>id</th><th>标签</th><th>触发条件 / 机制效果</th>"
-        body += "<th>页</th></tr></thead><tbody>"
-        kid = MODULE_KEY.get(mod)
-        link = f"<a href='rules/{kid}.html'>详情 →</a>" if kid else "—"
-        for r in items:
-            s = f"{r.get('id','')} {' '.join(r.get('标签',[]))} {r.get('触发条件','')} {r.get('机制效果','')}"
-            tagline = "".join(f"<span class='tag'>{h(t)}</span>" for t in r.get("标签", []))
-            body += (f"<tr data-search='{h(s)}'><td class='mono'>{h(r.get('id',''))}</td>"
-                     f"<td>{tagline}</td>"
-                     f"<td>{h(r.get('触发条件',''))} → {h(r.get('机制效果',''))}</td>"
-                     f"<td>{link}</td></tr>")
-        body += "</tbody></table></details>"
-    body += JS_FILTER
-    body = search_box(".idx") + body  # 顶部搜索框作用于索引表
-    return body, len(rules)
-
-
-# 模块字段值 -> 文件名 key（与 data/rules/build.py 保持一致）
-MODULE_KEY = {
-    "创建调查员": "character_creation", "技能": "skills", "游戏系统": "game_system",
-    "幕间成长": "interlude", "战斗": "combat", "追逐": "chase", "理智": "sanity",
-    "魔法": "magic", "主持游戏": "keeper", "附录": "appendix",
+function setActive(page){
+  document.querySelectorAll('nav a').forEach(function(a){a.classList.toggle('active',a.getAttribute('data-page')===page)})
+  history.replaceState(null,'','#'+page);
 }
 
+function render(){var c=document.getElementById('content');var fn=renderers[PAGE];c.innerHTML=fn?fn():(renderers.index?renderers.index():'')}
 
-# ------------------------------------------------------------------ 主流程
-def main():
-    os.makedirs(OUT_RULES, exist_ok=True)
-    updated = data_mtime().strftime("%Y-%m-%d %H:%M")
+window.onhashchange=function(){PAGE=location.hash.slice(1)||'index';setActive(PAGE);render()}
 
-    builders = {
-        "weapons": weapons_page, "monsters": monsters_page,
-        "spells": spells_page, "skills": skills_page, "rules": rules_index_page,
-    }
-    built = []
-    for name, fn in builders.items():
-        body, n = fn()
-        if body is None:
-            print(f"skip {name}.html (无数据)")
-            continue
-        html = page(labels[name], body, name, updated)
-        with open(os.path.join(OUT, f"{name}.html"), "w", encoding="utf-8") as f:
-            f.write(html)
-        built.append((name, n))
-        print(f"build {name}.html  ({n} 条)")
+// 搜索框
+function searchBox(id){return'<div class="search"><input placeholder="按关键词过滤…" oninput="var q=this.value.toLowerCase();document.querySelectorAll(\'#content [data-q]\').forEach(function(r){r.style.display=(!q||(r.getAttribute(\'data-q\')||\'\').indexOf(q)>=0)?\'\':\'none\'})"></div>'}
 
-    # 分章规则页：data/rules/<key>.json -> rules/<key>.html
-    import glob
+// 导航
+function buildNav(){
+  var s=PAGES.map(function(p){return'<a data-page="'+p+'" href="#'+p+'">'+LABELS[p]+'</a>'}).join('');
+  s+='<a data-page="readme" href="#readme">README</a>';
+  s+='<a href="https://github.com/AblazeGHR/RuleWhisper" target="_blank" style="font-weight:700;background:#e8f0fe;color:#1a73e8">⭐ GitHub</a>';
+  document.getElementById('nav').innerHTML=s;
+  setActive(PAGE);
+}
 
-    # README.html
-    import markdown
-    readme_md = os.path.join(ROOT, "README.md")
-    if os.path.exists(readme_md):
-        with open(readme_md, encoding="utf-8") as f:
-            md_text = f.read()
-        md_text = md_text.replace("(docs/wiki/)", "(index.html)")
-        md_text = md_text.replace("(docs/PLAN.md)", "(https://github.com/AblazeGHR/RuleWhisper/blob/main/docs/PLAN.md)")
-        html_body = markdown.markdown(md_text, extensions=['tables', 'fenced_code'])
-        readme_html = page("README", html_body, "README", updated)
-        with open(os.path.join(OUT, "README.html"), "w", encoding="utf-8") as f:
-            f.write(readme_html)
-        print("build README.html")
-    seen = set()
-    for path in sorted(glob.glob(os.path.join(RULES_DIR, "*.json"))):
-        key = os.path.splitext(os.path.basename(path))[0]
-        if key in seen:
-            continue
-        seen.add(key)
-        items = load_list(path)
-        if not items:
-            continue
-        body = rules_module_page(key, items)
-        html = page(f"规则·{key}", body, "rules", updated)
-        with open(os.path.join(OUT_RULES, f"{key}.html"), "w", encoding="utf-8") as f:
-            f.write(html)
-        built.append((f"rules/{key}", len(items)))
-        print(f"build rules/{key}.html  ({len(items)} 条)")
+var DATA=null;
+function loadData(){if(DATA)return;var x=new XMLHttpRequest();x.open('GET','data.json',false);x.send();DATA=JSON.parse(x.responseText)}
 
-    # 首页
-    cards = "".join(
-        f"<div class='card' style='grid-column:span 1'><h3><a href='{n}.html'>{labels[n]}</a></h3>"
-        f"<div class='aka'>{n}.html · {c} 条</div></div>" for n, c in built if "/" not in n)
-    mod_cards = "".join(
-        f"<div class='card' style='grid-column:span 1'><h3><a href='rules/{n.split('/')[1]}.html'>{n.split('/')[1]}</a></h3>"
-        f"<div class='aka'>rules/{n.split('/')[1]}.html · {c} 条</div></div>"
-        for n, c in built if n.startswith("rules/"))
-    idx_body = (f"<h2>数据更新时间 {updated}</h2>"
-                "<div class='note'>点击进入各数据审查页。</div>"
-                "<h2>总览</h2><div class='cards'>" + cards + mod_cards + "</div>")
-    with open(os.path.join(OUT, "index.html"), "w", encoding="utf-8") as f:
-        f.write(page("首页", idx_body, None, updated))
-    print("build index.html")
-    print("done.")
+var renderers={
+  index:function(){
+    loadData();
+    var cards=PAGES.map(function(p){
+      var count=DATA[p]?DATA[p].length:0;
+      return'<div class="card" style="grid-column:span 1"><h3><a href="#'+p+'">'+LABELS[p]+'</a></h3><div class="aka">'+count+' 条</div></div>'
+    }).join('');
+    var rc=Object.keys(DATA.rules_modules||{}).map(function(k){
+      var n=DATA.rules_modules[k].length;
+      return'<div class="card" style="grid-column:span 1"><h3><a href="#rules">规则·'+k+'</a></h3><div class="aka">'+n+' 条</div></div>'
+    }).join('');
+    return'<h2>数据更新时间 '+DATA.updated+'</h2><div class="note">点击进入各数据审查页。</div><h2>总览</h2><div class="cards">'+cards+rc+'</div>'
+  },
 
+  weapons:function(){
+    loadData();
+    var groups={};DATA.weapons.forEach(function(r){var c=r.类别||'未分类';(groups[c]=groups[c]||[]).push(r)});
+    var cols=[['名称','名称'],['技能','技能'],['伤���','伤害'],['基础射程','射程'],['每轮','每轮'],['装弹量','装弹量'],['价格','价格'],['故障值','故障值'],['贯穿','贯穿'],['时代','时代']];
+    var s='<h2>武器总览 ('+DATA.weapons.length+' 件)</h2><div class="note">按类别折叠，点击展开/收起。</div>';
+    Object.keys(groups).sort().forEach(function(cat){
+      var items=groups[cat];
+      s+='<details open><summary>'+h(cat)+'<span class="cnt">'+items.length+' 件</span></summary>';
+      s+='<table class="mono"><thead><tr>'+cols.map(function(x){return'<th>'+h(x[1])+'</th>'}).join('')+'</tr></thead><tbody>';
+      items.forEach(function(r){
+        var q=cols.map(function(x){return h(r[x[0]]||'')}).join(' ');
+        s+='<tr data-q="'+q+'">'+cols.map(function(x){return'<td>'+h(r[x[0]]||'')+'</td>'}).join('')+'</tr>';
+      });
+      s+='</tbody></table></details>';
+    });
+    return searchBox('w')+s;
+  },
+
+  monsters:function(){
+    loadData();
+    var groups={};DATA.monsters.forEach(function(r){var c=r.分类||'未分类';(groups[c]=groups[c]||[]).push(r)});
+    var s='<h2>怪物卡 ('+DATA.monsters.length+' 只)</h2><div class="note">按分类折叠，顶部可过滤。</div>';
+    Object.keys(groups).sort().forEach(function(cat){
+      var items=groups[cat];
+      s+='<details open><summary>'+h(cat)+'<span class="cnt">'+items.length+' 只</span></summary><div class="cards">';
+      items.forEach(function(r){
+        var name=h(r.名称||''),aka=h(r.别名||''),attrs=r.属性||{},dice=r.掷骰||{};
+        var q=(r.名称||'')+' '+(r.别名||'')+' '+(r.分类||'')+' '+(r.技能||'')+' '+(r.战斗方式||'')+' '+(r.法术||'')+' '+(r.理智损失||'')+' '+(r.id||'');
+        r.特殊能力&&Array.isArray(r.特殊能力)&&(q+=' '+r.特殊能力.join(' '));
+        Object.values(attrs).forEach(function(v){q+=' '+v});
+        var kv='STR CON SIZ DEX INT POW'.split(' ').map(function(k){return'<span><b>'+k+'</b> '+h(attrs[k]||'—')+(dice[k]?' <i>('+h(dice[k])+')</i>':'')+'</span>'}).join('');
+        kv+='HP 魔法值 伤害加值 体格 移动 每回合攻击'.split(' ').map(function(k){return'<span><b>'+k+'</b> '+h(r[k]||'—')+'</span>'}).join('');
+        var card='<div class="card" data-q="'+q+'"><h3>'+name+'</h3>';
+        if(aka)card+='<div class="aka">别名：'+aka+'</div>';
+        card+='<div class="tag" style="margin-bottom:6px">'+h(r.分类||'')+'</div>';
+        card+='<div class="kv">'+kv+'</div>';
+        if(r.格斗!=null)card+='<div class="row"><span><b>格斗</b> '+h(r.格斗)+'%</span><span><b>伤害</b> '+h(r.格斗_伤害||'')+'</span></div>';
+        if(r.闪避!=null)card+='<div class="row"><span><b>闪避</b> '+h(r.闪避)+'%</span></div>';
+        card+='<div class="row"><span><b>护甲</b> '+h(r.护甲||'')+'</span></div>';
+        ['技能','战斗方式','法术','理智损失'].forEach(function(f){
+          var v=r[f];if(typeof v==='object'&&v&&v.length)card+='<div class="row"><span><b>'+f+'</b> '+h(v.join('，'))+'</span></div>';
+          else if(v&&v!=='无。')card+='<div class="row"><span><b>'+f+'</b> '+h(v)+'</span></div>';
+        });
+        var sc=r.特殊能力;if(sc&&Array.isArray(sc)&&sc.length)card+='<div class="row"><b>特殊能力</b></div><div class="row"><ol style="margin:2px 0;padding-left:18px">'+sc.map(function(x){return'<li>'+h(x)+'</li>'}).join('')+'</ol></div>';
+        if(r.来源章节)card+='<div class="row"><span class="tag">'+h(r.来源章节)+'</span><span class="tag">'+h(r.id||'')+'</span></div>';
+        card+='</div>';
+        s+=card;
+      });
+      s+='</div></details>';
+    });
+    return searchBox('m')+s;
+  },
+
+  spells:function(){
+    loadData();
+    var s='<h2>法术列表 ('+DATA.spells.length+' 个)</h2><table class="mono"><thead><tr><th>名称</th><th>消耗</th><th>施法用时</th></tr></thead><tbody>';
+    DATA.spells.forEach(function(r){
+      var q=(r.名称||'')+' '+(r.消耗||'')+' '+(r.施法用时||'');
+      s+='<tr data-q="'+q+'"><td>'+h(r.名称||'')+'</td><td>'+h(r.消耗||'')+'</td><td>'+h(r.施法用时||'')+'</td></tr>';
+    });
+    s+='</tbody></table>';
+    return searchBox('s')+s;
+  },
+
+  skills:function(){
+    loadData();
+    var s='<h2>技能表 ('+DATA.skills.length+' 个)</h2><table class="mono"><thead><tr><th>名称</th><th>基础值</th></tr></thead><tbody>';
+    DATA.skills.forEach(function(r){
+      var q=(r.名称||'')+' '+(r.基础值||'');
+      s+='<tr data-q="'+q+'"><td>'+h(r.名称||'')+'</td><td>'+h(r.基础值||'')+'%</td></tr>';
+    });
+    s+='</tbody></table>';
+    return searchBox('sk')+s;
+  },
+
+  rules:function(){
+    loadData();
+    var groups={};DATA.rules.forEach(function(r){var m=r.模块||'未分类';(groups[m]=groups[m]||[]).push(r)});
+    var s='<div class="note">点击模块名展开详情。共 '+DATA.rules.length+' 条规则。</div>';
+    Object.keys(groups).sort().forEach(function(mod){
+      var items=groups[mod];
+      var head='<tr><th>id</th><th>标签</th><th>触发条件</th><th>机制效果</th><th>相关检定</th><th>判定流程</th><th>页</th></tr>';
+      s+='<details><summary>'+h(mod)+'<span class="cnt">'+items.length+' 条</span></summary>';
+      s+='<div class="scroll"><table class="mono"><thead>'+head+'</thead><tbody>';
+      items.forEach(function(r){
+        var tags=(r.标签||[]).map(function(t){return'<span class="tag">'+h(t)+'</span>'}).join('');
+        var flow=r.判定流程;if(Array.isArray(flow))flow='<ol style="margin:0;padding-left:18px">'+flow.map(function(x){return'<li>'+h(x)+'</li>'}).join('')+'</ol>';else flow=h(flow||'');
+        var mech=h(r.机制效果||'');
+        if(r.特殊规则)mech+=' <br><i>特殊：'+h(r.特殊规则)+'</i>';
+        if(r.说明)mech+=' <br><i>说明：'+h(r.说明)+'</i>';
+        if(r.原文引用)mech+=' <br><blockquote>「'+h(r.原文引用)+'」</blockquote>';
+        var q=(r.id||'')+' '+(r.触发条件||'')+' '+(r.机制效果||'')+' '+(r.原文引用||'')+' '+(r.标签||[]).join(' ')+' '+(r.相关检定||[]).join(' ');
+        s+='<tr data-q="'+q+'"><td class="mono">'+h(r.id||'')+'</td><td>'+tags+'</td><td>'+h(r.触发条件||'')+'</td><td>'+mech+'</td><td>'+h((r.相关检定||[]).join('、'))+'</td><td>'+flow+'</td><td class="mono">'+h(r.页码||'')+'</td></tr>';
+      });
+      s+='</tbody></table></div></details>';
+    });
+    return searchBox('r')+s;
+  },
+
+  readme:function(){
+    return'<h2>README</h2><div class="note">项目简介见 <a href="https://github.com/AblazeGHR/RuleWhisper" target="_blank">GitHub 仓库</a>。</div>';
+  }
+};
+
+buildNav();
+loadData();
+render();
+</script>
+</body>
+</html>"""
 
 if __name__ == "__main__":
     main()
