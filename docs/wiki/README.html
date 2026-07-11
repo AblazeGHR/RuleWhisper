@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>README · RuleWhisper Wiki</title><style>
+:root{--bg:#f7f7f4;--fg:#1f2328;--muted:#6b7280;--line:#e3e3df;
+--accent:#7c2d12;--accent2:#92400e;--card:#fff;--tag:#eef2f7;--tagfg:#334155}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.6 -apple-system,Segoe UI,Roboto,"Microsoft YaHei",sans-serif;
+background:var(--bg);color:var(--fg)}
+header{background:var(--accent);color:#fff;padding:14px 22px}
+header h1{margin:0;font-size:18px}
+header .sub{opacity:.85;font-size:12px;margin-top:2px}
+nav{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);
+display:flex;flex-wrap:wrap;gap:4px;padding:8px 22px}
+nav a{text-decoration:none;color:var(--fg);padding:5px 12px;border-radius:6px;font-size:13px}
+nav a:hover{background:var(--tag)}
+nav a.active{background:var(--accent);color:#fff}
+main{padding:18px 22px;max-width:1180px;margin:0 auto}
+h2{font-size:16px;margin:22px 0 10px;color:var(--accent2)}
+table{border-collapse:collapse;width:100%;background:var(--card);margin:8px 0 18px;
+font-size:13px}
+th,td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+th{background:#f0efe9;font-weight:600;white-space:nowrap}
+tr:nth-child(even) td{background:#fafaf8}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+details{border:1px solid var(--line);border-radius:8px;background:var(--card);
+margin:10px 0;overflow:hidden}
+summary{cursor:pointer;padding:10px 14px;font-weight:600;background:#f0efe9;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary .cnt{color:var(--muted);font-weight:400;margin-left:6px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:14px 16px}
+.card h3{margin:0 0 2px;font-size:15px}
+.card .aka{color:var(--muted);font-size:12px;margin-bottom:8px}
+.kv{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 14px;font-size:12.5px}
+.kv b{color:var(--muted);font-weight:500}
+.card .row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 0;font-size:12.5px}
+.tag{display:inline-block;background:var(--tag);color:var(--tagfg);border-radius:4px;
+padding:1px 7px;font-size:11.5px;margin:1px}
+.search{position:sticky;top:46px;z-index:4;background:var(--bg);padding:8px 0 12px}
+.search input{width:100%;max-width:420px;padding:7px 11px;border:1px solid var(--line);
+border-radius:7px;font-size:13px}
+.note{color:var(--muted);font-size:12px;margin:4px 0 14px}
+.empty{color:var(--muted);padding:30px;text-align:center}
+footer{color:var(--muted);font-size:12px;padding:14px 22px;border-top:1px solid var(--line)}
+</style></head>
+<body><header><h1>RuleWhisper 数据 Wiki</h1>
+<div class="sub">结构化数据审查 · 数据更新时间 2026-07-11 21:24</div></header>
+<nav><a class="" href="weapons.html">武器</a><a class="" href="monsters.html">怪物</a><a class="" href="spells.html">法术</a><a class="" href="skills.html">技能</a><a class="" href="rules.html">规则</a><a href="README.html">README</a><a href="https://github.com/AblazeGHR/RuleWhisper" target="_blank" style="font-weight:700;background:#e8f0fe;color:#1a73e8">⭐ GitHub</a></nav><main><h1>RuleWhisper</h1>
+<blockquote>
+<p>COC 全能跑团助手 —— 一个看得懂规则、跟得上进度、帮你承担 KP 压力的跑团 AI。</p>
+</blockquote>
+<hr />
+<h2>目录</h2>
+<ul>
+<li><a href="#rulewhisper">RuleWhisper</a></li>
+<li><a href="#目录">目录</a></li>
+<li><a href="#想象一下">想象一下</a></li>
+<li><a href="#它将可以做什么">它将可以做什么</a><ul>
+<li><a href="#这本书对我有什么影响">"这本书对我有什么影响？"</a></li>
+<li><a href="#这枪伤害多少">"这枪伤害多少？"</a></li>
+<li><a href="#我掷一个侦查">"我掷一个侦查"</a></li>
+<li><a href="#这个人是谁">"这个人是谁？"</a></li>
+<li><a href="#现在第几轮了">"现在第几轮了？"</a></li>
+<li><a href="#我的角色卡呢">"我的角色卡呢？"</a></li>
+<li><a href="#角色卡交给我就行">"角色卡交给我就行"</a></li>
+<li><a href="#会不会夺走跑团的快乐">"会不会夺走跑团的快乐？"</a></li>
+<li><a href="#为什么是这样">"为什么是这样？"</a></li>
+<li><a href="#我的玩法我做主">"我的玩法我做主"</a></li>
+</ul>
+</li>
+<li><a href="#计划功能">计划功能</a><ul>
+<li><a href="#基础查询">基础查询</a></li>
+<li><a href="#骰子与检定">骰子与检定</a></li>
+<li><a href="#角色卡与数据管理">角色卡与数据管理</a></li>
+<li><a href="#规则派生与自订">规则派生与自订</a></li>
+<li><a href="#战斗与追逐自动化">战斗与追逐自动化</a></li>
+<li><a href="#npc-与场景生成">NPC 与场景生成</a></li>
+<li><a href="#跑团会话管理">跑团会话管理</a></li>
+<li><a href="#知识库辅助">知识库辅助</a></li>
+</ul>
+</li>
+<li><a href="#它与传统工具的区别">它与传统工具的区别</a></li>
+<li><a href="#当前进度">当前进度</a></li>
+<li><a href="#现在就能玩">现在就能玩</a></li>
+<li><a href="#版权声明">版权声明</a></li>
+</ul>
+<hr />
+<blockquote>
+<h3>📖 <a href="index.html">Wiki 数据审查</a></h3>
+<p>本项目json化的所有武器表、怪物卡、法术列表、规则条目以网页形式呈现。
+逐条验证数据质量 —— 打开即看，无需部署。</p>
+</blockquote>
+<hr />
+<h2>想象一下</h2>
+<p>你正在带《猩红文档》。调查员们撬开了古董商维克的书房，翻出一本封皮渗着粘液的旧书。哈维的玩家问："我读一下？"你深吸一口气，开始翻规则书——阅读神话典籍要掉多少理智？要多久？读完能学会什么法术？</p>
+<p>最理想的情况：你对着 Bot 说了一句话，Bot 告诉你一切。你没有让玩家等待。你甚至没碰规则书。</p>
+<p>然后玩家的注意力继续留在故事里，而不是消失在你翻书的沙沙声中。</p>
+<p>这就像一个帮你记住所有规则、却从不抢戏的副守秘人——你想让它多活跃，它就多活跃。</p>
+<hr />
+<h2>它将可以做什么</h2>
+<blockquote>
+<p>（陈述仅为项目愿景，当前开发进度见<a href="#计划功能">计划功能</a>和<a href="#当前进度">当前进度</a>）</p>
+</blockquote>
+<h3>"这本书对我有什么影响？"</h3>
+<p>不是让你去查关键词。</p>
+<pre><code>KP:  玩家拿起一本《死灵之书》读起来。怎么处理？
+
+Bot:  阅读 1 本神话典籍需要 2D6 周，进行一次 INT 检定。
+      成功 → 理智损失 1D8，克苏鲁神话 +3%。
+      失败 → 理智损失 1D10，仍可学会书中的 1D4 个法术。
+      —— 若 SAN 检查失败并损失 5+ 理智，触发临时性疯狂判定。
+      （来源：第九章 魔法 第145页）
+</code></pre>
+<p>你问了半句话，它给了你完整的判定链——下一步要掷什么骰子、成功和失败分别怎么处理、后续连锁效应是什么。而且每一句判定都告诉你<strong>出自规则书哪一页</strong>。你不只是知道结果——你还知道为什么。想自己去翻书确认？页码已经给你了。</p>
+<h3>"这枪伤害多少？"</h3>
+<p>KP 和玩家都能问。方式不限。</p>
+<pre><code>玩家:  我的 .38 左轮打人疼吗？
+Bot:   .38/9mm 左轮手枪  伤害 1D10  射程 15 码  装弹 6 发
+       （来源：第十六章 附录 第373页）
+
+玩家:  霰弹枪呢？
+Bot:   12 号泵动式霰弹枪  伤害 4D6/2D6/1D6（近/中/远）
+       射程 10/20/50 码  装弹 5 发
+       （来源：第十六章 附录 第374页）
+
+玩家:  打中人会怎样？
+Bot:   霰弹枪伤害随距离衰减。基础射程内 4D6，2 倍 2D6，4 倍 1D6。
+       极难成功时可贯穿，追加武器伤害骰。
+       （来源：第六章 战斗 第87页、第97页）
+</code></pre>
+<p>不需要翻武器表，不需要记住伤害衰减规则。用自然语言问，用自然语言追问。每条回复都带页码，你可以随时去规则书验证。</p>
+<h3>"我掷一个侦查"</h3>
+<p>骰子可以传统命令，也可以自然语言。玩家习惯什么就用什么。</p>
+<pre><code>哈维:  侦查 55
+Bot:   [22/55] 困难成功！
+
+罗杰:  .rc 力量 65
+Bot:   [81/65] 失败
+
+哈维:  偷偷溜过守卫
+Bot:   潜行检定。哈维 潜行 40%。
+       掷出 [18/40] 困难成功 —— 你贴着墙根无声穿过走廊。
+
+罗杰:  投个 3d6
+Bot:   3D6 = 5+3+6 = 14
+</code></pre>
+<p>不管你用传统骰令 <code>.rc</code>/<code>.ra</code>/<code>.r</code>，还是直接说"侦查 55"、"投个 3d6"、"偷偷溜过守卫"，Bot 都能理解。老玩家继续用熟悉的格式，新玩家不需要学命令语法。</p>
+<h3>"这个人是谁？"</h3>
+<pre><code>KP:  帮我生成一个 1920s 纽约的私家侦探，叫杰克·卡特
+
+Bot:  ┌─────────────────────────┐
+      │ 杰克·卡特  私家侦探       │
+      │ STR 55  CON 60  SIZ 50   │
+      │ DEX 65  INT 70  POW 65   │
+      │ 侦查 65%  图书馆使用 50%  │
+      │ 手枪 40%  话术 45%        │
+      │ HP 11  伤害加值 0         │
+      │                           │
+      │ 职业规则：私家侦探         │
+      │ 本职技能点：EDU×2+DEX×2   │
+      │ （来源：第三章 创建调查员   │
+      │  第30页）                  │
+      └─────────────────────────┘
+</code></pre>
+<p>你用自然语言描述一个角色，它给你一张数值卡。你甚至可以继续："太弱了，威吓也加到 60%"，或"再加一个黑暗秘密的背景"。不只是给你数据——它还告诉你这些数值是怎么来的、规则依据是哪一页。</p>
+<h3>"现在第几轮了？"</h3>
+<pre><code>KP:  深潜者从码头冲出来了。进入战斗。
+
+Bot:  [第一轮] 敏捷顺序：深潜者 60 → 哈维 55 → 罗杰 50
+      深潜者的回合：它会攻击最接近的那个人。
+      （来源：第六章 战斗 第86页 敏捷与攻击次序）
+
+KP:  深潜者往哈维扑去。
+
+Bot:  深潜者 格斗 40%。哈维选择反击还是闪避？
+      （来源：第六章 战斗 第87页 近战对抗检定）
+
+KP:  哈维闪避。投出 33。失败。
+Bot:  哈维闪避失败。深潜者命中。伤害 1D8+1D4。投出 4+2 = 6。
+      哈维 HP 15 → 9。未超过最大 HP 的一半（8），轻伤。
+      深潜者行动结束。下一回合：哈维。
+      （来源：第六章 战斗 第99页 伤害分类）
+
+哈维:  我还手！
+Bot:  哈维的回合。哈维 格斗 25%。深潜者选择反击。
+      哈维掷出 [03/25] 极难成功！贯穿判定——
+      拳脚是非贯穿武器，伤害取最大值 3 点（来源：第六章 战斗 第87页）。
+      哈维一拳正中深潜者下颚。深潜者 HP 13 → 10。
+</code></pre>
+<p>一场战斗的每一轮、每个人的回合、每一次检定和伤害结算，都在自动推进。你不需要记住"该轮到谁"、"已经第几轮"、"那个 NPC 还剩几点血"——Bot 在替你记。更重要的是，每当出现"贯穿"、"轻伤"、"非贯穿武器取最大值"这些规则细节时——<strong>它不是蒙的，它知道规则在哪一页。</strong></p>
+<h3>"我的角色卡呢？"</h3>
+<pre><code>KP:   哈维受伤 6 点
+Bot:   哈维 HP 15 → 9 (轻伤)
+
+KP:   刚才翻书看到了修格斯，掉多少理智？
+Bot:   修格斯 理智损失 1D6/1D20。哈维 SAN 38，未受伤情况下看到。
+Bot:   哈维 SAN 检定 [45/38] 失败。损失 1D20 → 12。SAN 38 → 26。
+      SAN 单次损失 ≥ 5 → 智力检定 [52/70] 成功 → 进入临时性疯狂，持续 1D10 小时。
+      疯狂发作判定（来源：第八章 理智 第132-133页）：
+
+哈维:  我现在是疯了吗
+Bot:   临时性疯狂中，剩余 1D10 = 7 小时。
+      理智值 26/38。
+      （来源：第八章 理智 第132页）
+
+罗杰:  .status
+Bot:   ┌────────┬─────┬──────┬──────┬──────────┐
+      │ 角色    │ HP  │ SAN  │ 状态  │ 备注     │
+      ├────────┼─────┼──────┼──────┼──────────┤
+      │ 哈维    │ 9   │ 26   │ 疯狂  │ 7h 后恢复│
+      │ 罗杰    │ 14  │ 60   │ 正常  │ -        │
+      │ 修格斯  │ 63  │ -    │ 战斗中 │ 已受 4 伤 │
+      └────────┴─────┴──────┴──────┴──────────┘
+</code></pre>
+<p>骰子、属性、HP、SAN——全部在一个地方。每个玩家可以自己掷、自己看、随时问"我现在是什么状态"。KP 一个 <code>.status</code> 看到全局。不需要纸、不需要 Excel——就在群里，就像在桌面上。</p>
+<h3>"角色卡交给我就行"</h3>
+<p>跑团最头疼的环节之一：开局收卡。六个人六份格式不一的 Excel，有人技能栏横着写，有人竖着写，有人把生命值填在备注里。</p>
+<pre><code>哈维:  [上传文件] 哈维_Walter.xlsx
+
+Bot:   正在解析角色卡...
+
+       ┌─────────────────────────────┐
+       │ 哈维·沃尔特  新闻记者 1920s   │
+       │ STR 55  CON 60  SIZ 50       │
+       │ DEX 65  INT 70  POW 65       │
+       │ EDU 80  APP 55               │
+       │                              │
+       │ 技能（已识别 18/18）:          │
+       │ 侦查 55%  图书馆使用 50%      │
+       │ 聆听 45%  话术 60%  乔装 35%  │
+       │ 心理学 40%  历史 30%           │
+       │ 克苏鲁神话 0%                 │
+       │                              │
+       │ HP 11  伤害加值 0  SAN 65     │
+       │ 信用评级 40  幸运 50          │
+       │                              │
+       │ 背景摘要：                    │
+       │ &quot;纽约日报记者，妻子艾米丽&quot;     │
+       │ ⚠ 请确认以上信息是否正确      │
+       └─────────────────────────────┘
+
+哈维:  信用评级是 45，不是 40
+Bot:   已修正。信用评级 40 → 45。其余不变。
+</code></pre>
+<p>不管玩家给你的是标准角色卡模板、自己画的 Excel、甚至从老版本角色卡粘贴过来的文本，Bot 都能解析出属性、技能和背景。有不对的地方，一句话就能改。</p>
+<p>三个小时之后，跑团结束。</p>
+<pre><code>Bot:  本次跑团完毕。
+      哈维 技能成长：
+        侦查 55 → 61（成长成功）
+        图书馆使用 50 → 53（成长成功）
+        话术 60（未成长）
+        乔装 35 → 41（成长成功）
+      经历：目击修格斯、阅读《死灵之书》残章
+      永久性记录：克苏鲁神话 0 → 3%
+      理智 65 → 38
+      [导出角色卡] 哈维_Walter_更新.xlsx
+</code></pre>
+<p>Bot 自动列出所有标记的技能成长检定、掷骰判定结果、更新数值。一键导出，交还给玩家——下回再跑，直接上传这张更新后的卡，继续这个角色的旅程。</p>
+<h3>"会不会夺走跑团的快乐？"</h3>
+<p>读到这里，你可能在想一个问题：什么都是 Bot 做了，我还有什么好玩的？</p>
+<p>不管你是想要真实的触摸骰子的质感，还是享受于亲手计算数值……bot不会阻拦你做任何事情。</p>
+<p>作为一个模块化的项目，你可以禁用任何一个你不喜欢的功能，以免喧宾夺主。</p>
+<pre><code>你想要的效果                → 启用什么
+
+&quot;我只想快速查规则，别的不用&quot;   → 只开查询引擎，关掉骰子、战斗、角色卡
+&quot;我要自己掷骰子，Bot 别碰&quot;    → 只开规则查询 + 角色卡管理，关闭自动检定
+&quot;我需要战斗轮追踪，手算太累&quot;   → 开战斗自动化，其余不变
+&quot;全交给 Bot，我专注于叙事&quot;    → 全开
+&quot;今天我只想有个能搜的规则书&quot;   → 关掉 Bot 模式，纯查——和翻 PDF 一样，但更快
+</code></pre>
+<p>每跑一个团、每一桌、甚至每一个场景——你都可以按当时的喜好调整 Bot 的参与程度。这周想全手动，下周想让助手多分担——完全随你。</p>
+<p>它的终极形态是副 KP。但你完全可以在很长一段时间里，只把它当做一本<strong>能用自然语言搜索的电子规则书</strong>。没有人会逼你用更多。</p>
+<h3>"为什么是这样？"</h3>
+<p>信任不是凭空来的。Bot 的每一个判定、每一条数据、每一个数字——后面都跟着来源页码。</p>
+<pre><code>KP:   这个贯穿伤害怎么算的？确定没错？
+Bot:   极难成功 × 非贯穿武器 = 伤害骰取最大值（含伤害加值）。
+      极难成功 × 贯穿武器 = 取最大值 + 额外追加武器伤害骰。
+      （来源：第六章 战斗 第87页 &quot;极限伤害与贯穿&quot;）
+
+      原文：&quot;如果极限成功的攻击是由贯穿武器造成的，这次攻击会造成贯穿。还额外增加一份武器的伤害骰。&quot;
+</code></pre>
+<p>任何时候你对 Bot 的回答有疑问——怀疑它算错了、漏了步骤、或者编造了规则——直接问它。它会告诉你在规则书的哪一页、原文怎么写的。它不会搪塞你，因为它没有"编造"的能力——它的每一条规则判定都可以追溯到一个明确的来源。</p>
+<h3>"我的玩法我做主"</h3>
+<pre><code>KP:   这把没有自动武器，1920s 的美国小镇怎么会有 AK。
+
+Bot:  已禁用全部自动武器（汤普森冲锋枪保留，因为黑帮穿西装端它太经典了）。
+      禁用的武器在查询中不再出现，NPC 生成也不会选择它们。
+      当前规则版本：v2.0（你的房规）
+      来源版本：v1.0（七版标准规则）
+</code></pre>
+<p>规则不是 PDF。你的房规可以直接生效。禁用了什么、改了什么——都有版本记录。你可以随时切回标准规则，随时导出给其他 KP，随时查看两个版本的差异。每一个模组、每一个战役、每一个 KP 风格——规则是你说了算。</p>
+<hr />
+<h2>计划功能</h2>
+<p>（已有 ✅ 标注说明功能已实现，其余按优先级排列。）</p>
+<h3>基础查询</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>规则关键词搜索</td>
+<td>已有 ✅ 输入"霰弹枪伤害"、"临时疯狂判定"等关键词，秒级返回含章节/页码的原文段落。</td>
+</tr>
+<tr>
+<td>自然语言规则问答</td>
+<td>你不需要记术语。"拿凳子砸人会怎样？"、"上次遇到食尸鬼我掉多少理智来着？"——用跑团时自然说的话来问。</td>
+</tr>
+<tr>
+<td>武器查询</td>
+<td>已有 ✅ 查武器名返回全部参数——伤害骰、射程、装弹量、价格、故障值、年代。</td>
+</tr>
+<tr>
+<td>怪物查询</td>
+<td>已有 ✅ 查怪物名返回属性卡——STR/CON/SIZ/HP/伤害加值/格斗/闪避/护甲/理智损失。</td>
+</tr>
+<tr>
+<td>法术查询</td>
+<td>已有 ✅ 查法术名返回消耗与施法条件。</td>
+</tr>
+<tr>
+<td>技能查询</td>
+<td>已有 ✅ 84 个技能的基础值与分类一览。</td>
+</tr>
+<tr>
+<td>分类浏览</td>
+<td>按武器类型（手枪/步枪/霰弹/爆炸物）、怪物种类（神话生物/野兽/经典妖魔）、法术类别分别导航。</td>
+</tr>
+<tr>
+<td>规则章节索引</td>
+<td>按系统分类（战斗/理智/魔法/追逐/创建/附录）浏览全部规则条目。</td>
+</tr>
+</tbody>
+</table>
+<h3>骰子与检定</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>基础掷骰</td>
+<td><code>.r 3d6</code>、<code>.r 1d100</code>——不受 COC 约束的通用掷骰，也接受加减和 K/Q 筛骰。</td>
+</tr>
+<tr>
+<td>技能检定</td>
+<td><code>.rc 侦查 55</code> 自动判定成功等级（大成功 ≤1、困难 ≤1/2、极难 ≤1/5、失败 96+ 大失败），并标记成长检查。</td>
+</tr>
+<tr>
+<td>属性检定</td>
+<td><code>.ra 力量 65</code> 同上，属性值参与判定。</td>
+</tr>
+<tr>
+<td>奖励骰 / 惩罚骰</td>
+<td><code>.rb 侦查 55</code> 投双十位取优；<code>.rp 侦查 55</code> 投双十位取劣。支持叠加至多两颗。</td>
+</tr>
+<tr>
+<td>伤害掷骰</td>
+<td><code>.dam 1d8+1d4</code> 直接给出伤害数值。</td>
+</tr>
+<tr>
+<td>理智检定</td>
+<td><code>.sc 0/1d6</code> 左右侧分别对应成功/失败损失；可选该次是否自动触发智力检定和临时疯狂。</td>
+</tr>
+<tr>
+<td>对抗检定</td>
+<td><code>.rc 斗殴 45 vs 闪避 30</code> 双方分别给出成功等级，Bot 判定争端结果及伤害归属。</td>
+</tr>
+<tr>
+<td>暗骰与私骰</td>
+<td>掷骰结果仅发送给 KP；群内仅提示"骰子已落下"。</td>
+</tr>
+<tr>
+<td>多段连续检定</td>
+<td><code>.rs 3#侦查</code> 一次性为你做 3 次侦查检定并罗列结果。</td>
+</tr>
+<tr>
+<td>检定重播</td>
+<td><code>.r</code> 在无参数时重播上一条检定的数值和结果。</td>
+</tr>
+</tbody>
+</table>
+<h3>角色卡与数据管理</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>角色卡存储</td>
+<td>创建/查询/删除角色的全属性与技能数据，绑定玩家 QQ。</td>
+</tr>
+<tr>
+<td>角色卡快速查看</td>
+<td><code>.st</code> 随时随地查询任意已绑定角色的当前状态。</td>
+</tr>
+<tr>
+<td>实时状态修改</td>
+<td><code>HP-5</code>、<code>SAN-3</code>、<code>MP-2</code> 等一条命令完成修改，Bot 自动记录。</td>
+</tr>
+<tr>
+<td>受伤/恢复自动化</td>
+<td>收到伤害时自动判定轻伤/重伤/濒死，提示体质检定与倒地；提供每日/每周恢复速度。</td>
+</tr>
+<tr>
+<td>理智变更链</td>
+<td>损失理智后自动检查是否 ≥5（临时疯狂）、是否累计 ≥1/5（不定疯狂），提示后续 INT 检定和疯狂发作掷骰。</td>
+</tr>
+<tr>
+<td>疯狂发作管理</td>
+<td>记录疯狂起始时间、持续时间（1D10 小时 / 数天），到点自动恢复或进入下一阶段。</td>
+</tr>
+<tr>
+<td>经验与幕间成长</td>
+<td>跑团后 <code>.interlude</code> 列出所有标记为可成长的技能，Bot 逐个帮你掷检定并提升技能值。</td>
+</tr>
+<tr>
+<td>NPC 状态快照</td>
+<td>任意 NPC 的属性、HP、理智状态、身上装备都能成一条记录，战斗中随时修改、查询。</td>
+</tr>
+<tr>
+<td>角色卡导入</td>
+<td>玩家上交 Excel/PDF 角色卡，Bot 自动识别属性、技能、背景条目并转为本地数据。格式不统一也能解析。</td>
+</tr>
+<tr>
+<td>角色卡导出</td>
+<td>跑团结束后，Bot 自动将成长后的角色卡（含新技能值、新增背景条目、受伤记录）导出为 Excel，交还玩家。</td>
+</tr>
+</tbody>
+</table>
+<h3>规则派生与自订</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>已有 ✅ 房规武器/怪物/法术</td>
+<td>基于已有 JSON 数据直接修改——修改一把枪的伤害骰、禁用一个怪物、调整法术消耗，保存为一个独立版本。</td>
+</tr>
+<tr>
+<td>版本管理</td>
+<td>每个规则发布一个新版本：v1.0（默认规则）、v2.0（你的模组房规）、v3.0（实验性规则）。查询、掷骰均可选择适用版本，"切回默认"一键完成。</td>
+</tr>
+<tr>
+<td>规则继承</td>
+<td>基于上级版本派生——v2.0 只改动了 3 把武器、1 个法术的消耗，则其余所有规则自动继承自 v1.0，减少冗余。</td>
+</tr>
+<tr>
+<td>v1.0 锁定</td>
+<td>默认七版规则版本仅可读，任何派生版本才能修改数据，防止误操作破坏原生数据。</td>
+</tr>
+<tr>
+<td>版本导出/共享</td>
+<td>导出房规版本为一个 JSON 文件，其他 KP 可以直接导入，支持单文件和模组包两种格式。</td>
+</tr>
+<tr>
+<td>规则比较</td>
+<td>给定两个版本，Bot 列出所有差异条目的具体变更——哪行变了、怎么变的、新增了什么、删除了什么。</td>
+</tr>
+<tr>
+<td>规则预览</td>
+<td>发布新版本前预览变更效果——禁用了霰弹枪后，武器查询列表不再出现霰弹枪，NPC 生成不会随机选择禁用的武器。</td>
+</tr>
+<tr>
+<td>版本快照与回滚</td>
+<td>随时保存当前数据快照为一个版本名称，随时可以回溯。</td>
+</tr>
+</tbody>
+</table>
+<h3>战斗与追逐自动化</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>战斗轮初始化</td>
+<td>输入参战者后 Bot 按敏捷排序确定行动顺序，并对枪械持有者 +50 敏捷计算。</td>
+</tr>
+<tr>
+<td>轮次追踪</td>
+<td>每回合提示当前行动者、剩余行动机会，结算后自动推进下一人。多轮次持续追踪。</td>
+</tr>
+<tr>
+<td>近战判定</td>
+<td>自动比较攻击方格斗 vs 目标方（反击/闪避），匹配成功等级判定伤害归属。</td>
+</tr>
+<tr>
+<td>战技处理</td>
+<td>比较双方体格，自动施加惩罚骰，战技成功则应用缴械/压制等特殊效果。</td>
+</tr>
+<tr>
+<td>射击判定</td>
+<td>按距离自动设置难度（常规/困难/极难），检查故障值，处理抵近奖励与掩体惩罚。</td>
+</tr>
+<tr>
+<td>自动武器弹幕</td>
+<td>全自动武器按弹药数量分组判定，每次连射后递减奖励骰并追加惩罚骰，成功判定子弹命中数。</td>
+</tr>
+<tr>
+<td>贯穿判定</td>
+<td>攻击检定极难成功时自动识别武器是否贯穿性，计算伤害提升量。</td>
+</tr>
+<tr>
+<td>伤害结算</td>
+<td>自动判定轻伤/重伤/濒死/死亡，自动进行体质检定。</td>
+</tr>
+<tr>
+<td>状态追踪</td>
+<td>重伤标记、倒地/昏迷/濒死状态、止血/医学处理、每日/每周恢复进度全部自动追踪。</td>
+</tr>
+<tr>
+<td>寡不敌众</td>
+<td>一轮内多次被攻击时，后续攻击方自动获得奖励骰。</td>
+</tr>
+<tr>
+<td>追逐规则</td>
+<td>初始化追逐对象后，Bot 负责轮次管理、MOV 计算、体质检定、险境触发、距离推进和胜负判定。</td>
+</tr>
+</tbody>
+</table>
+<h3>NPC 与场景生成</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NPC 生成</td>
+<td>输入年代、职业、难度，Bot 根据规则生成一个属性、技能、装备各不冲突的合理 NPC。</td>
+</tr>
+<tr>
+<td>配角集群生成</td>
+<td>一次生成一组 NPC（例如 5 个村民、3 个黑帮成员、2 个警察），支持批量编辑属性。</td>
+</tr>
+<tr>
+<td>怪物实例化</td>
+<td>从数据库中选取怪物后按掷骰生成具体数值（如 STR 3D6×5）创建携带 ID 的独立实例。</td>
+</tr>
+<tr>
+<td>场景描述</td>
+<td>根据地点、氛围、年代提供一段文本描述（例如"1920s 阿卡姆大学的图书馆"），供 KP 直接使用或修改。</td>
+</tr>
+<tr>
+<td>线索生成</td>
+<td>输入线索内容，KP 可以快速分发给玩家，支持剧情关键信息的结构化管理。</td>
+</tr>
+<tr>
+<td>天气/环境/随机事件</td>
+<td>输入地点和时间，随机生成天气和环境细节，丰富叙事。</td>
+</tr>
+</tbody>
+</table>
+<h3>跑团会话管理</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>模组/章节切换</td>
+<td>Bot 记录当前模组名称和章节，方便在同一服务器内切换不同故事。</td>
+</tr>
+<tr>
+<td>检定日志</td>
+<td>自动记录每一轮的掷骰、判定、伤害与状态变更，可回溯查询。</td>
+</tr>
+<tr>
+<td>复盘模式</td>
+<td>跑团结束后生成一个日志——谁在什么时候掷了什么、发生了什么关键战斗和伤害。</td>
+</tr>
+<tr>
+<td>角色卡历史</td>
+<td>玩家可以查看自己的检定记录和角色卡历史变化。</td>
+</tr>
+<tr>
+<td>全局状态仪表盘</td>
+<td><code>.status</code> 查看当前所有参战者的 HP/MP/SAN/状态，一目了然。</td>
+</tr>
+</tbody>
+</table>
+<h3>知识库辅助</h3>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>相关规则推荐</td>
+<td>你查临时疯狂判定时，Bot 附上"你可能还需要"→ 不定疯狂 / 疯狂发作症状表 / 理智损失参考。</td>
+</tr>
+<tr>
+<td>案例搜索</td>
+<td>"给我一个躲闪失败的例子看看"——Bot 从规则书的游戏范例中拉出实战案例。</td>
+</tr>
+<tr>
+<td>法术联动查询</td>
+<td>查克苏鲁召唤术时，Bot 也返回"需要配合使用的法术"→ 旧印 / 请神术 / 送神术。</td>
+</tr>
+<tr>
+<td>跨规则引用</td>
+<td>"战斗中中毒怎么判定？"Bot 同时显示毒素等级表（战斗章节）+ 体质检定规则（系统章节）。</td>
+</tr>
+<tr>
+<td>术语解释</td>
+<td>"什么是极限成功？什么是体格？什么是边缘值？"Bot 给出简洁的规则定义并附带来源页码。</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>它与传统工具的区别</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>传统骰娘</th>
+<th>规则书 PDF</th>
+<th>这个项目</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>掷骰</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅ （兼容多种风格的命令和自然语言）</td>
+</tr>
+<tr>
+<td>查规则</td>
+<td>✅（靠输入help命令，查询复杂）</td>
+<td>✅（翻书）</td>
+<td>✅（自然语言，秒回且允许追问）</td>
+</tr>
+<tr>
+<td>记角色卡</td>
+<td>✅(操作复杂，手打命令)</td>
+<td>❌</td>
+<td>✅（自动进行数值操作）</td>
+</tr>
+<tr>
+<td>追踪战斗轮</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>生成 NPC</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>理解游戏进程</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>支持自定义房规</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>&gt; 部分骰娘也许已经拥有了更多的功能，但是请相信——能读懂自然语言的LLM，不会比靠硬代码的骰娘差。</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>---</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>当前进度</h2>
+<pre><code>基础查询（武器/怪物/法术/技能/规则）    ████████  ✅
+规则知识库（191 条，10 模块）            ████████  ✅
+自然语言查询 + 关键词搜索                 ████████  ✅
+骰子与检定                                ░░░░░░░░  ⬜
+角色卡与数据管理                          ░░░░░░░░  ⬜
+规则派生与版本管理                        ░░░░░░░░  ⬜
+战斗/追逐自动化                           ░░░░░░░░  ⬜
+NPC 与场景生成                            ░░░░░░░░  ⬜
+跑团会话管理                              ░░░░░░░░  ⬜
+QQ Bot 接入                               ░░░░░░░░  ⬜
+</code></pre>
+<hr />
+<h2>现在就能玩</h2>
+<pre><code class="language-bash">python -m venv .venv &amp;&amp; source .venv/Scripts/activate
+pip install -r requirements.txt
+
+python src/cli.py rule &quot;霰弹枪伤害&quot;
+python src/cli.py weapon &quot;左轮&quot;
+python src/cli.py monster &quot;深潜者&quot;
+</code></pre>
+<hr />
+<p><a href="https://github.com/AblazeGHR/RuleWhisper/blob/main/docs/PLAN.md">开发规划 (PLAN.md)</a></p>
+<h2>版权声明</h2>
+<p>本项目中的规则书内容（武器数据、怪物属性、法术描述、游戏机制等）翻译自《克苏鲁的呼唤》第七版守秘人规则书，版权归 <strong>Chaosium Inc.</strong> 所有。</p>
+<p>中文译文由同好社区翻译，首发于纯美苹果园，仅供<strong>个人学习交流</strong>使用。<strong>严禁</strong>将本项目中的规则数据用于任何商业用途，包括但不限于：售卖、广告、付费服务、捆绑商业产品。</p>
+<p>《Call of Cthulhu》为 Chaosium Inc. 的注册商标。若喜欢本书，请访问 <a href="https://www.chaosium.com">Chaosium 官网</a> 获取正版。</p>
+<p>本项目代码部分（<code>src/</code>、<code>docs/wiki/build.py</code> 等）为原创，遵循 MIT 协议。</p></main>
+<footer>由 docs/wiki/build.py 自动生成 · 纯静态，无依赖</footer></body></html>
