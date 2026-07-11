@@ -38,7 +38,9 @@
 
 > ### 📖 [Wiki 数据审查](https://rulewhisper.ablaze.dpdns.org/)
 > 本项目json化的所有武器表、怪物卡、法术列表、规则条目以网页形式呈现。
-> 逐条验证数据质量 —— 打开即看，无需部署。
+> 逐条验证数据质量 —— [点击此处，打开即看，无需部署(由ablazeGHR维护的静态网页)](https://rulewhisper.ablaze.dpdns.org/)。
+> 
+>[本地html文件](docs\wiki\index.html)
 
 ---
 
