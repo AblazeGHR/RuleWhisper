@@ -6,7 +6,7 @@ from datetime import datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
-DATA = os.path.join(ROOT, "data")
+DATA = os.path.join(ROOT, "data", "versions", "v1.0")
 RULES_DIR = os.path.join(DATA, "rules")
 OUT = HERE
 

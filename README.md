@@ -36,10 +36,14 @@
 
 ---
 > ## 📖 [数据审查](https://rulewhisper.ablaze.dpdns.org/)
-> 本项目json化的所有武器表、怪物卡、法术列表、规则条目以网页形式呈现。
+> 本项目的所有武器表、怪物卡、法术列表、规则条目将直接通过数据构建成网页形式，以便快速核对。
 > 逐条验证数据质量 —— [无需部署，点击此处浏览(由ablazeGHR维护的静态网页)](https://rulewhisper.ablaze.dpdns.org/)。
-> 
->[本地html文件](docs\wiki\index.html)
+> 现阶段不保证数据全部正确，如发现错误，欢迎您的指出或修改:）
+
+- [部署到公网的静态网页](https://rulewhisper.ablaze.dpdns.org/)
+- [本地html文件](docs\wiki\index.html)
+- [构建脚本](docs\wiki\build.py)
+
 ---
 
 ## 想象一下
