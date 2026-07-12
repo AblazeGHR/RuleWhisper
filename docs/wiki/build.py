@@ -152,6 +152,31 @@ footer{color:var(--muted);font-size:12px;padding:14px 22px;border-top:1px solid 
 .mini th,.mini td{border:1px solid var(--line);padding:2px 6px}
 .mini th{background:#f0efe9;font-weight:600}
 blockquote{border-left:3px solid var(--line);margin:6px 0;padding:4px 12px;color:var(--muted)}
+pre{max-width:100%;overflow-x:auto;background:#f0efe9;padding:10px 14px;border-radius:6px;border:1px solid var(--line);font-size:12.5px}
+pre code{white-space:pre-wrap;word-break:break-word}
+@media(max-width:768px){
+  header{padding:10px 14px}
+  header h1{font-size:16px}
+  nav{padding:6px 8px;gap:2px}
+  nav a{padding:4px 8px;font-size:12px}
+  main{padding:10px 12px}
+  h2{font-size:15px;margin:16px 0 8px}
+  .cards{grid-template-columns:1fr}
+  .card{padding:12px 14px}
+  .kv{grid-template-columns:1fr 1fr}
+  .kv span{font-size:12px}
+  .search{top:44px}
+  .search input{max-width:100%}
+  table{font-size:12px}
+  th,td{padding:4px 5px}
+  details summary{padding:8px 10px;font-size:13px}
+  footer{padding:10px 14px;font-size:11px}
+  .rules-table,.rules-table tbody,.rules-table tr,.rules-table td{display:block}
+  .rules-table thead{display:none}
+  .rules-table tr{border:1px solid var(--line);border-radius:8px;background:var(--card);padding:10px 14px;margin:8px 0}
+  .rules-table td{border:none;padding:3px 0;text-align:left}
+  .rules-table td::before{content:attr(data-label);font-weight:600;color:var(--muted);display:inline-block;min-width:66px;font-size:11px;margin-right:6px}
+}
 </style>
 </head>
 <body>
@@ -216,12 +241,12 @@ var renderers={
     Object.keys(groups).sort().forEach(function(cat){
       var items=groups[cat];
       s+='<details><summary>'+h(cat)+'<span class="cnt">'+items.length+' 件</span></summary>';
-      s+='<table class="mono"><thead><tr>'+cols.map(function(x){return'<th>'+h(x[1])+'</th>'}).join('')+'</tr></thead><tbody>';
+      s+='<div class="scroll"><table class="mono"><thead><tr>'+cols.map(function(x){return'<th>'+h(x[1])+'</th>'}).join('')+'</tr></thead><tbody>';
       items.forEach(function(r){
         var q=cols.map(function(x){return h(r[x[0]]||'')}).join(' ');
         s+='<tr data-q="'+q+'">'+cols.map(function(x){return'<td>'+h(r[x[0]]||'')+'</td>'}).join('')+'</tr>';
       });
-      s+='</tbody></table></details>';
+      s+='</tbody></table></div></details>';
     });
     return searchBox('w')+s;
   },
@@ -275,7 +300,7 @@ var renderers={
       }
       card+='<div class="kv"><span><b>消耗</b> '+h(r.消耗||'')+'</span><span><b>施法用时</b> '+h(r.施法用时||'')+'</span></div>';
       if(r.效果)card+='<div class="row"><span><b>效果</b> '+h(r.效果)+'</span></div>';
-      if(r.来源章节||r.页码)card+='<div class="row"><span class="tag">'+h(r.来源章节||'')+'</span>'+h(r.页码?'<span class="tag">'+r.页码+'</span>':'')+'</div>';
+      if(r.来源章节||r.页码)card+='<div class="row"><span class="tag">'+h(r.来源章节||'')+'</span>'+(r.页码?'<span class="tag">'+h(r.页码)+'</span>':'')+'</div>';
       card+='</div>';
       s+=card;
     });
@@ -300,9 +325,9 @@ var renderers={
     var s='<div class="note">点击模块名展开详情。共 '+DATA.rules.length+' 条规则。</div>';
     Object.keys(groups).sort().forEach(function(mod){
       var items=groups[mod];
-      var head='<tr><th>id</th><th>标签</th><th>触发条件</th><th>机制效果</th><th>相关检定</th><th>判定流程</th><th>页</th></tr>';
+      var head='<tr><th>触发条件</th><th>标签</th><th>机制效果</th><th>相关检定</th><th>判定流程</th><th>页</th></tr>';
       s+='<details><summary>'+h(mod)+'<span class="cnt">'+items.length+' 条</span></summary>';
-      s+='<div class="scroll"><table class="mono"><thead>'+head+'</thead><tbody>';
+      s+='<div class="scroll"><table class="mono rules-table"><thead>'+head+'</thead><tbody>';
       items.forEach(function(r){
         var tags=(r.标签||[]).map(function(t){return'<span class="tag">'+h(t)+'</span>'}).join('');
         var flow=r.判定流程;if(Array.isArray(flow))flow='<ul style="list-style:none;margin:0;padding-left:0">'+flow.map(function(x){return'<li>'+h(x)+'</li>'}).join('')+'</ul>';else flow=h(flow||'');
@@ -311,7 +336,7 @@ var renderers={
         if(r.说明)mech+=' <br><i>说明：'+h(r.说明)+'</i>';
         if(r.原文引用)mech+=' <br><blockquote>「'+h(r.原文引用)+'」</blockquote>';
         var q=(r.id||'')+' '+(r.触发条件||'')+' '+(r.机制效果||'')+' '+(r.原文引用||'')+' '+(r.标签||[]).join(' ')+' '+(r.相关检定||[]).join(' ');
-        s+='<tr data-q="'+q+'"><td class="mono">'+h(r.id||'')+'</td><td>'+tags+'</td><td>'+h(r.触发条件||'')+'</td><td>'+mech+'</td><td>'+h((r.相关检定||[]).join('、'))+'</td><td>'+flow+'</td><td class="mono">'+h(r.页码||'')+'</td></tr>';
+        s+='<tr data-q="'+q+'"><td data-label="触发条件"><span class="tag mono">'+h(r.id||'')+'</span> '+h(r.触发条件||'')+'</td><td data-label="标签">'+tags+'</td><td data-label="机制效果">'+mech+'</td><td data-label="相关检定">'+h((r.相关检定||[]).join('、'))+'</td><td data-label="判定流程">'+flow+'</td><td data-label="页" class="mono">'+h(r.页码||'')+'</td></tr>';
       });
       s+='</tbody></table></div></details>';
     });
