@@ -215,7 +215,7 @@ var renderers={
     var s='<h2>武器总览 ('+DATA.weapons.length+' 件)</h2><div class="note">按类别折叠，点击展开/收起。</div>';
     Object.keys(groups).sort().forEach(function(cat){
       var items=groups[cat];
-      s+='<details open><summary>'+h(cat)+'<span class="cnt">'+items.length+' 件</span></summary>';
+      s+='<details><summary>'+h(cat)+'<span class="cnt">'+items.length+' 件</span></summary>';
       s+='<table class="mono"><thead><tr>'+cols.map(function(x){return'<th>'+h(x[1])+'</th>'}).join('')+'</tr></thead><tbody>';
       items.forEach(function(r){
         var q=cols.map(function(x){return h(r[x[0]]||'')}).join(' ');
@@ -232,7 +232,7 @@ var renderers={
     var s='<h2>怪物卡 ('+DATA.monsters.length+' 只)</h2><div class="note">按分类折叠，顶部可过滤。</div>';
     Object.keys(groups).sort().forEach(function(cat){
       var items=groups[cat];
-      s+='<details open><summary>'+h(cat)+'<span class="cnt">'+items.length+' 只</span></summary><div class="cards">';
+      s+='<details><summary>'+h(cat)+'<span class="cnt">'+items.length+' 只</span></summary><div class="cards">';
       items.forEach(function(r){
         var name=h(r.名称||''),aka=h(r.别名||''),attrs=r.属性||{},dice=r.掷骰||{};
         var q=(r.名称||'')+' '+(r.别名||'')+' '+(r.分类||'')+' '+(r.技能||'')+' '+(r.战斗方式||'')+' '+(r.法术||'')+' '+(r.理智损失||'')+' '+(r.id||'');
@@ -263,12 +263,23 @@ var renderers={
 
   spells:function(){
     loadData();
-    var s='<h2>法术列表 ('+DATA.spells.length+' 个)</h2><table class="mono"><thead><tr><th>名称</th><th>消耗</th><th>施法用时</th></tr></thead><tbody>';
+    var s='<h2>法术列表 ('+DATA.spells.length+' 个)</h2><div class="note">卡片式展示，顶部可过滤。</div><div class="cards">';
     DATA.spells.forEach(function(r){
-      var q=(r.名称||'')+' '+(r.消耗||'')+' '+(r.施法用时||'');
-      s+='<tr data-q="'+q+'"><td>'+h(r.名称||'')+'</td><td>'+h(r.消耗||'')+'</td><td>'+h(r.施法用时||'')+'</td></tr>';
+      var name=h(r.名称||''),alias=r.别名;
+      var q=(r.名称||'')+' '+(r.消耗||'')+' '+(r.施法用时||'')+' '+(r.效果||'')+' '+(r.id||'');
+      if(alias){if(Array.isArray(alias))q+=' '+alias.join(' ');else q+=' '+alias}
+      var card='<div class="card" data-q="'+q+'"><h3>'+name+'</h3>';
+      if(alias){
+        if(Array.isArray(alias))card+='<div class="aka">别名：'+h(alias.join('，'))+'</div>';
+        else card+='<div class="aka">别名：'+h(alias)+'</div>';
+      }
+      card+='<div class="kv"><span><b>消耗</b> '+h(r.消耗||'')+'</span><span><b>施法用时</b> '+h(r.施法用时||'')+'</span></div>';
+      if(r.效果)card+='<div class="row"><span><b>效果</b> '+h(r.效果)+'</span></div>';
+      if(r.来源章节||r.页码)card+='<div class="row"><span class="tag">'+h(r.来源章节||'')+'</span>'+h(r.页码?'<span class="tag">'+r.页码+'</span>':'')+'</div>';
+      card+='</div>';
+      s+=card;
     });
-    s+='</tbody></table>';
+    s+='</div>';
     return searchBox('s')+s;
   },
 
@@ -294,7 +305,7 @@ var renderers={
       s+='<div class="scroll"><table class="mono"><thead>'+head+'</thead><tbody>';
       items.forEach(function(r){
         var tags=(r.标签||[]).map(function(t){return'<span class="tag">'+h(t)+'</span>'}).join('');
-        var flow=r.判定流程;if(Array.isArray(flow))flow='<ol style="margin:0;padding-left:18px">'+flow.map(function(x){return'<li>'+h(x)+'</li>'}).join('')+'</ol>';else flow=h(flow||'');
+        var flow=r.判定流程;if(Array.isArray(flow))flow='<ul style="list-style:none;margin:0;padding-left:0">'+flow.map(function(x){return'<li>'+h(x)+'</li>'}).join('')+'</ul>';else flow=h(flow||'');
         var mech=h(r.机制效果||'');
         if(r.特殊规则)mech+=' <br><i>特殊：'+h(r.特殊规则)+'</i>';
         if(r.说明)mech+=' <br><i>说明：'+h(r.说明)+'</i>';
