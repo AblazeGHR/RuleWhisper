@@ -15,7 +15,7 @@ from engine.structured_query import query_weapons, query_monsters, query_spells,
 
 RELEVANCE_THRESHOLD = 30
 
-_DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
+_DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "versions" / "v1.0"
 
 _ENTITY_NAMES: Optional[dict[str, list[str]]] = None
 

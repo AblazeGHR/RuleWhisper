@@ -7,3 +7,4 @@ data/ch14_raw.txt
 data/character.json
 docs/wiki/**/*.html
 .wrangler/
+privateDocs/

@@ -4,9 +4,9 @@
 P3 规则模块化构建脚本。
 
 职责：
-1. 为 data/rules.json 中每条规则补上 `模块` 字段（按章节归类，少数规则覆盖到幕间成长模块）。
-2. 按模块拆分输出到 data/rules/<module_key>.json。
-3. 保留合并视图 data/rules.json 作为单一事实来源（single source of truth）。
+1. 为 data/versions/v1.0/rules.json 中每条规则补上 `模块` 字段（按章节归类，少数规则覆盖到幕间成长模块）。
+2. 按模块拆分输出到 data/versions/v1.0/rules/<module_key>.json。
+3. 保留合并视图 data/versions/v1.0/rules.json 作为单一事实来源（single source of truth）。
 
 模块划分（字段值 / 文件名 key）：
     创建调查员  character_creation   第三章
@@ -27,7 +27,9 @@ import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)  # data/
-RULES = os.path.join(ROOT, "rules.json")
+V10 = os.path.join(ROOT, "versions", "v1.0")
+RULES = os.path.join(V10, "rules.json")
+RULES_MODULES = os.path.join(V10, "rules")
 
 # 章节名 -> (模块字段值, 文件名key)
 CHAPTER_MODULE = {
@@ -78,7 +80,7 @@ def main():
     # 拆分输出
     summary = []
     for key, items in sorted(buckets.items()):
-        out = os.path.join(HERE, f"{key}.json")
+        out = os.path.join(RULES_MODULES, f"{key}.json")
         json.dump(items, open(out, "w", encoding="utf-8"),
                   ensure_ascii=False, indent=2)
         summary.append((key, len(items)))
