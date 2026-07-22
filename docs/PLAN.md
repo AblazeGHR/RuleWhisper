@@ -14,7 +14,7 @@
 | P3 规则知识库 | `rules/*.json`，191 条，10 模块，字段完整 | ✅ |
 | P3 怪物数据 | `monsters.json`，88 只（神话 37+神灵 30+经典 7+野兽 14） | ✅ |
 | P3 法术数据 | `spells.json`，109 法术（第十二章全量提取） | ✅ |
-| P4 智能路由 | `router.py`，四档分发（结构化 → 全文 → RAG → LLM） | ✅ |
+| P4 智能路由 | `router.py`，两档分发（结构化 → 全文），RAG/LLM 档待 P6 接入 | ✅ |
 | P5 骰子引擎 | `src/dice/`，parser + resolver + character，COC 7th 全命令 | ✅ |
 | P9 规则版本 | `versioning.py`，创建/修改/比较/导出规则版本 | ✅ |
 | Wiki 可视化 | `docs/wiki/build.py`，静态 HTML 审查 + README 渲染 | ✅ |
@@ -61,5 +61,5 @@ D:/project/ai_coc/          → main
 D:/project/ai_coc_dice/     → dice-engine   (已合并)
 D:/project/ai_coc_router/   → router        (已合并)
 D:/project/ai_coc_rules/    → rules-version (已合并)
-D:/project/ai_coc_wiki/     → wiki-view     (维护中)
+D:/project/ai_coc_wiki/     → wiki-view     (已合并)
 ```
