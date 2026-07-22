@@ -158,3 +158,119 @@ Pan session 的 game_id 从哪来？
 ---
 
 *创建：2026-07-22 · 状态：已确认，待实现*
+
+
+---
+
+## 九、实施计划与关键注意点
+
+### 9.1 实施顺序
+
+**第 1 步：创建 `game/` 基础设施**
+- 新增 `src/game/__init__.py`（game 管理逻辑）
+- 新增 `src/game/character_store.py`（角色卡 CRUD）
+- 不需要 new 目录——game 目录在首次 `game new` 时自动创建
+
+**第 2 步：实现 CLI 命令**
+- 在 `src/cli.py` 增加 `game` 和 `char` 两个子命令
+- `cmd_game(args)` → 解析 `new|list|info|bind`
+- `cmd_char(args)` → 解析 `new|list|show`
+
+**第 3 步：改造 character.py**
+- `character.py` 从全局单例改为接受 `game_id` + `char_name` 参数
+- `set_attr(game_id, char_name, attr, value)` 读 `game/{game_id}/characters/{char_name}.json`
+- `get_attr`/`set_skill`/`set_san` 同理
+- 保留向后兼容：`game_id=None` 时回退到原 `data/character.json` 行为
+
+**第 4 步：更新 MCP Server**
+- `src/server/mcp.py` 的 6 个 tool 全部增加 `game_id: str | None = None` 参数
+- `roll_dice` 传入 `game_id` 给 resolver（resolver 内部用 `character.set_attr(game_id, ...)`）
+- `get_weapon`/`get_monster`/`get_spell`/`get_skill`→`query_rule` 用 `game_id` 查 game.json 的 `mode` → 决定规则版本
+
+**第 5 步：更新 HTTP API**
+- `src/server/__init__.py` 的端点增加可选 `game_id` 参数
+- `/api/dice`、`/api/query`、`/api/weapon|monster|spell|skill/{name}` 的请求体/query param 加 `game_id`（可选）
+
+### 9.2 关键注意点
+
+#### ⚠️ game_id 与 resolver 的耦合点
+
+`resolver.py` 的 `_resolve_value` 调用 `character.get_skill()` / `character.get_attr()`。
+
+**改造方式**：不要改 resolver 的签名（保持 `resolve(cmd: DiceCommand) -> DiceResult`）。在调用 resolver 之前，先用 `game_id` 设置 `character` 模块的当前上下文。
+
+建议：`character.py` 新增 `set_current(game_id, char_name)` → 后续所有 `get_attr`/`set_skill` 等操作自动走该上下文。这样 resolver 内部代码无需改动。
+
+```
+# 调用方（MCP/CLI/HTTP API）
+character.set_current(game_id, "哈维")
+result = resolver.run(".rc 侦查 60")
+```
+
+#### ⚠️ 规则版本切换
+
+`structured_query.query_weapons` 等函数已接受 `version` 参数——但当前 `version` = 版本 ID（如 `v1.0`），不是 `game_id`。
+
+**中间层**：新增 `src/game/version.py`，提供 `get_mode(game_id) -> str`：
+```python
+def get_mode(game_id: str | None) -> str:
+    if game_id is None:
+        return versioning.get_default_version() or "v1.0"
+    game_json = load_game(game_id)
+    mode = game_json.get("mode", "coc7th")
+    return mode_to_version(mode)  # "coc7th" → "v1.0"
+```
+
+#### ⚠️ game_id 为 null 的降级
+
+所有接受 `game_id` 的函数必须处理 `None`：
+- `get_mode(None)` → 默认版本 v1.0
+- `character.set_current(None, ...)` → 使用原 `data/character.json` 单例
+- 这使得未创建 game 的场景仍然可用，向后兼容
+
+#### ⚠️ .gitignore
+
+`game/` 目录应加入 `.gitignore`——角色卡数据是用户运行时数据，不应提交到仓库。
+
+#### ⚠️ manifest.json 不变
+
+`pan_plugin/manifest.json` 的 `mcp_servers` 不需要加 `--game-id`——game_id 已经是 MCP 工具参数，Pan session 调 tool 时动态传入，不在 spawn 时确定。
+
+### 9.3 验证方式
+
+```bash
+# CLI 测试
+python src/cli.py game new "测试团"              # → 打印 game_id
+python src/cli.py game list                      # → 列出，含刚创建的
+python src/cli.py char new <game_id> "哈维"      # → 创建角色卡
+python src/cli.py char list <game_id>             # → 列出卡
+python src/cli.py dice ".st 侦查 60"              # → 设置（走 game_id 上下文）
+python src/cli.py dice ".rc 侦查"                 # → 检定（读 game_id 下卡）
+
+# MCP 测试
+python -c "import asyncio; import src.server.mcp as m; print(asyncio.run(m.mcp.list_tools()))"
+# → 确认 6 个 tool 都有 game_id 参数
+
+# HTTP 测试
+curl http://127.0.0.1:9731/api/health
+curl -X POST http://127.0.0.1:9731/api/dice -H 'Content-Type:application/json'      -d '{"text":".rc 侦查 60","game_id":"<game_id>"}'
+```
+
+### 9.4 文件变更清单
+
+| 文件 | 操作 | 说明 |
+|------|------|------|
+| `src/game/__init__.py` | 新建 | game 管理模块（创建/列出/绑定 group_id） |
+| `src/game/character_store.py` | 新建 | 角色卡 CRUD（读写 `game/{id}/characters/`） |
+| `src/game/version.py` | 新建 | game_id → 规则版本查询 |
+| `src/dice/character.py` | 改造 | 支持 `set_current(game_id, name)` 上下文 |
+| `src/dice/resolver.py` | 不改 | 继续用 character 模块当前上下文 |
+| `src/cli.py` | 增加 | `game`/`char` 子命令 |
+| `src/server/__init__.py` | 改造 | 端点增加可选 `game_id` |
+| `src/server/mcp.py` | 改造 | 6 个 tool 增加可选 `game_id` |
+| `.gitignore` | 增加 | `game/` |
+| `docs/game-layer-设计方案.md` | 本文件 | 设计文档 |
+
+---
+
+*创建：2026-07-22 · 状态：方案已确认，待实现（本文件即为实现手册）*
