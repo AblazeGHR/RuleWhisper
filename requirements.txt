@@ -11,6 +11,9 @@ pdfplumber
 # chromadb
 # sentence-transformers
 
-# Optional: P5 QQ Bot
-# aiohttp
+# P0 HTTP API 层 / P1 MCP Server（Pan 联动方案）
+fastapi
+uvicorn
+mcp
+httpx
 markdown

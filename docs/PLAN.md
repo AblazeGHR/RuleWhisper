@@ -19,6 +19,8 @@
 | P9 规则版本 | `versioning.py`，创建/修改/比较/导出规则版本 | ✅ |
 | Wiki 可视化 | `docs/wiki/build.py`，静态 HTML 审查 + README 渲染 | ✅ |
 | Wiki 部署 | Cloudflare Worker + Assets，自动部署 | ✅ |
+| P0 HTTP API | `src/server/`，FastAPI 薄封装，端口 9731 | ✅ |
+| P1 MCP Server | `src/server/mcp.py`，fastmcp 工具暴露给 Pan Worker | ✅ |
 
 ### 数据全景
 
@@ -49,7 +51,7 @@ python src/cli.py rebuild → 重建索引
 
 | 阶段 | 内容 |
 |------|------|
-| P6 QQ Bot | NapCat HTTP API 接入，群内 `!coc` 规则速查 + `.rc` 骰令 + 自然语言问答 |
+| P6 联动 Pan | 不自建 QQ Bot / LLM；RuleWhisper 提供 HTTP API + MCP Server，由 Pan 的 QQ Bot 通道与 LLM Worker 接入。详见 `docs/Pan联动实施方案.md`。P0/P1 已完成（RuleWhisper 侧），P2/P3 在 Pan 侧 |
 | P7 角色卡 | CRUD + Excel 导入解析 + 跑团后导出更新卡 |
 | P8 战斗/追逐 | 敏捷排序 → 攻防判定 → 战技/贯穿/伤害结算 → 状态追踪全自动 |
 | P10 生成器 | NPC 工厂（年代/职业/难度）、集群生成、场景叙事文本辅助 |
