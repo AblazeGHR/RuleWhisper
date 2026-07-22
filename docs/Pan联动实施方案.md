@@ -246,10 +246,10 @@ QQ 群消息 ".rc 1d100 侦察检定"
 ```
 QQ 群消息 "短剑的伤害是多少？如果恐怖猎手用短剑捅我，我要怎么闪避？"
   → Pan NoneBot plugin.py (on_message)
-  → 未命中前缀路由 → 走 LLM 路径
-  → Pan 用 "coc-keeper" profile spawn cbc Worker（绑定 RuleWhisper MCP）
-  → Worker 收到任务，LLM 分析需要:
-    → call_tool("get_weapon", {"name": "短剑"}) → 返回武器属性
+  → 未命中前缀路由 → 走 character session 的 LLM 路径
+  → Character 由 "coc-keeper" profile 创建，绑定了 RuleWhisper MCP
+  → Session 内 LLM 分析需要:
+    ��� call_tool("get_weapon", {"name": "短剑"}) → 返回武器属性
     → call_tool("get_monster", {"name": "恐怖猎手"}) → 返回怪物属性
     → call_tool("query_rule", {"query": "闪避规则"}) → 返回闪避规则
   → LLM 综合以上数据生成回复

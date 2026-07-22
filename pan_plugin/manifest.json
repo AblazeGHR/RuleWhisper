@@ -1,4 +1,11 @@
 {
+  "_concepts": {
+    "profile": "Character 创建模板。Pan 用 profile 的 adapter/model/mcp_servers/system_prompt 创建 character，创建后 character 独立运行，拥有唯一记忆和多个 session。",
+    "character": "独立机器人实例，由 profile 创建。持有唯一记忆，可挂多个 session。同一 profile 可创建多个同规格、各自记忆的 character。",
+    "session": "character 下的一个对话房间（绑 group_id + character_id）。session 内需计算时才 spawn Worker，Worker 无状态无个性。",
+    "mcp_servers": "此 profile 创建的 character 绑定的外部工具（RuleWhisper MCP）。注入给 character 的 session，LLM 经 MCP 调 RuleWhisper 的规则/骰子引擎。",
+    "command_routes": "确定性指令路由，群消息前缀匹配后直发 HTTP API，不经过 character/Worker/LLM，毫秒级响应。"
+  },
   "name": "rulewhisper",
   "description": "COC 跑团助手 — 规则检索 + 骰子引擎",
   "health_check": "http://127.0.0.1:9731/api/health",
