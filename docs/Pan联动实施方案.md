@@ -320,7 +320,7 @@ P0 (RuleWhisper HTTP API)     ← 本阶段可立即开始，0 外部依赖
 | 阶段 | 状态 | 说明 |
 |------|------|------|
 | P0 HTTP API | ✅ 完成 | `src/server/`，FastAPI，端口 9731；8 个端点全部验证通过 |
-| P1 MCP Server | ✅ 完成 | `src/server/mcp.py`，fastmcp，注册 6 个工具；stdio / SSE 均可 |
+| P1 MCP Server | ✅ 完成 | `src/server/mcp.py`，fastmcp，注册全部能力工具（~15 个，不含 rebuild_index）；stdio / SSE 均可 |
 | 插件声明 | ✅ 完成 | `pan_plugin/manifest.json`，声明 profiles/routes/mcp_servers(coc-keeper model=hy3)；Pan 通过通用 loader 加载 |
 | P2 通用 Manifest Loader | ⏳ 待 Pan | Pan 实现 loader 读取 manifest 并合并 profiles/mcp/routes；RuleWhisper 零改动 |
 | P3 联调 | ⏳ 待 P2 | QQ 群内跑团全链路验证，依赖 Pan 完成 P2 |

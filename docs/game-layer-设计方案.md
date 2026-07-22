@@ -120,12 +120,24 @@ char 相关：
 
 | tool | 新增参数 | 说明 |
 |------|---------|------|
-| `roll_dice` | `game_id: str | null` | `.rc`/`.st` 需要角色卡上下文 |
-| `get_weapon` | `game_id: str | null` | 不同 game 可使用不同规则版本 |
-| `get_monster` | `game_id: str | null` | 同上 |
-| `get_spell` | `game_id: str | null` | 同上 |
-| `get_skill` | `game_id: str | null` | 同上 |
-| `query_rule` | `game_id: str | null` | 同上 |
+| `roll_dice` | `game_id` | `.rc`/`.st` 需要角色卡上下文 |
+| `query_rule` | `game_id` | 不同 game 可使用不同规则版本 |
+| `get_weapon` | `game_id` | 同上 |
+| `get_monster` | `game_id` | 同上 |
+| `get_spell` | `game_id` | 同上 |
+| `get_skill` | `game_id` | 同上 |
+| `game_create` | — | KP 在群内建团 |
+| `game_list` | — | 列出所有团 |
+| `game_info` | `game_id` | 查看团元数据 |
+| `game_bind` | `game_id`, `group_id` | 绑定 QQ 群 |
+| `char_create` | `game_id`, `name` | 添加调查员 |
+| `char_list` | `game_id` | 列出团内角色 |
+| `char_show` | `game_id`, `name` | 查看角色卡详情 |
+| `char_update` | `game_id`, `name`, `values` | 更新角色卡属性/技能 |
+| `version_list` | — | 列出可用规则版本 |
+| `version_info` | `version_id` | 查看版本详情 |
+
+所有 tool 的 `game_id` 参数允许 `null`（尚未建团时使用默认规则版本）。`rebuild_index` 唯一不暴露给 LLM。
 
 - `game_id` 为 `null` 时使用默认规则版本（v1.0），代表尚未创建 game。
 - 🟢 已确认。
