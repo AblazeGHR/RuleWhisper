@@ -1,0 +1,44 @@
+{
+  "name": "rulewhisper",
+  "description": "COC 跑团助手 — 规则检索 + 骰子引擎",
+  "health_check": "http://127.0.0.1:9731/api/health",
+
+  "command_routes": [
+    {
+      "prefixes": [".rc", ".ra", ".rb", ".rp", ".rs", ".sc", ".dam"],
+      "target": "http://127.0.0.1:9731/api/dice",
+      "method": "POST",
+      "strip_prefix": true
+    },
+    {
+      "prefixes": [".coc", ".rule"],
+      "target": "http://127.0.0.1:9731/api/query",
+      "method": "POST",
+      "strip_prefix": true
+    }
+  ],
+
+  "mcp_servers": [
+    {
+      "name": "rulewhisper",
+      "command": "python",
+      "args": ["-m", "src.server.mcp"],
+      "cwd": "${PLUGIN_DIR}"
+    }
+  ],
+
+  "profiles": [
+    {
+      "name": "coc-keeper",
+      "adapter": "cbc",
+      "model": "hy3",
+      "permission_mode": "bypassPermissions",
+      "mcp_servers": ["rulewhisper"],
+      "system_prompt": [
+        "你是 COC 守秘人(KP)，用中文回复。",
+        "所有规则查询和骰子检定都通过 RuleWhisper 工具进行，绝不自己编数据。",
+        "检定结果需展示公式与最终值。"
+      ]
+    }
+  ]
+}

@@ -321,7 +321,8 @@ P0 (RuleWhisper HTTP API)     ← 本阶段可立即开始，0 外部依赖
 |------|------|------|
 | P0 HTTP API | ✅ 完成 | `src/server/`，FastAPI，端口 9731；8 个端点全部验证通过 |
 | P1 MCP Server | ✅ 完成 | `src/server/mcp.py`，fastmcp，注册 6 个工具；stdio / SSE 均可 |
-| P2 Pan 端 MCP 透传 | ⏳ 待 Pan | RuleWhisper 无需改代码，由 Pan 侧 `config.json` 注入 `mcp_servers` |
+| 插件声明 | ✅ 完成 | `pan_plugin/manifest.json`，声明 profiles/routes/mcp_servers(coc-keeper model=hy3)；Pan 通过通用 loader 加载 |
+| P2 通用 Manifest Loader | ⏳ 待 Pan | Pan 实现 loader 读取 manifest 并合并 profiles/mcp/routes；RuleWhisper 零改动 |
 | P3 联调 | ⏳ 待 P2 | QQ 群内跑团全链路验证，依赖 Pan 完成 P2 |
 
 > 提交记录：`feat(P0/P1): 实现 HTTP API 与 MCP Server，对接 Pan 生态`（main，已推送 origin）。
@@ -329,12 +330,9 @@ P0 (RuleWhisper HTTP API)     ← 本阶段可立即开始，0 外部依赖
 ### 11.2 下一阶段行动项
 
 **P2（Pan 侧，RuleWhisper 零改动）**
-1. Pan `config.json` 的 `profiles.coc-keeper.mcp_servers` 增加：
-   ```jsonc
-   {"name": "rulewhisper", "command": "python", "args": ["-m", "src.server.mcp"]}
-   ```
-2. 确保 Pan Worker spawn 时把该 profile 的 `--mcp-config` 注入 cbc/kimi。
-3. system_prompt 约定「规则查询与骰子检定一律走 RuleWhisper 工具，禁止自编数据」。
+1. Pan `config.json` 增加 `plugin_manifests` 引用 RuleWhisper 的 `pan_plugin/manifest.json`（一行路径，不含领域字面量）。
+2. Pan 实现通用 manifest loader：读取 manifest → 合并 `profiles`/`mcp_servers`/`command_routes` 到全局池。
+3. 解析 `${PLUGIN_DIR}` → manifest 所在目录，供 MCP Server 的 `cwd` 使用。
 
 **P3（联调，QQ 群内）**
 1. Pan NoneBot 命令路由：前缀 `.rc`/`.ra`/`.rb`/`.rp`/`.rs`/`.sc`/`.dam` → `POST /api/dice`；`.coc`/`.rule`/无前缀自然语言 → 走 LLM（coc-keeper profile，自动调 RuleWhisper MCP）。
