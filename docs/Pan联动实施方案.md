@@ -313,4 +313,42 @@ P0 (RuleWhisper HTTP API)     ← 本阶段可立即开始，0 外部依赖
 
 ---
 
+## 十一、进度追踪与下一阶段（P2 / P3）
+
+### 11.1 进度
+
+| 阶段 | 状态 | 说明 |
+|------|------|------|
+| P0 HTTP API | ✅ 完成 | `src/server/`，FastAPI，端口 9731；8 个端点全部验证通过 |
+| P1 MCP Server | ✅ 完成 | `src/server/mcp.py`，fastmcp，注册 6 个工具；stdio / SSE 均可 |
+| P2 Pan 端 MCP 透传 | ⏳ 待 Pan | RuleWhisper 无需改代码，由 Pan 侧 `config.json` 注入 `mcp_servers` |
+| P3 联调 | ⏳ 待 P2 | QQ 群内跑团全链路验证，依赖 Pan 完成 P2 |
+
+> 提交记录：`feat(P0/P1): 实现 HTTP API 与 MCP Server，对接 Pan 生态`（main，已推送 origin）。
+
+### 11.2 下一阶段行动项
+
+**P2（Pan 侧，RuleWhisper 零改动）**
+1. Pan `config.json` 的 `profiles.coc-keeper.mcp_servers` 增加：
+   ```jsonc
+   {"name": "rulewhisper", "command": "python", "args": ["-m", "src.server.mcp"]}
+   ```
+2. 确保 Pan Worker spawn 时把该 profile 的 `--mcp-config` 注入 cbc/kimi。
+3. system_prompt 约定「规则查询与骰子检定一律走 RuleWhisper 工具，禁止自编数据」。
+
+**P3（联调，QQ 群内）**
+1. Pan NoneBot 命令路由：前缀 `.rc`/`.ra`/`.rb`/`.rp`/`.rs`/`.sc`/`.dam` → `POST /api/dice`；`.coc`/`.rule`/无前缀自然语言 → 走 LLM（coc-keeper profile，自动调 RuleWhisper MCP）。
+2. 确定性链路冒烟：群内发 `.rc 1d100 侦察检定`，应在毫秒级收到 RuleWhisper 计算结果。
+3. 自然语言链路冒烟：群内问「短剑伤害多少？恐怖猎手怎么闪避？」，LLM 应调用 `get_weapon`/`get_monster`/`query_rule` 后综合回复。
+4. 回归：确认 P0 的 `/api/health` 在联调期间持续返回 `{"status":"ok"}`。
+
+### 11.3 RuleWhisper 侧的后续独立阶段
+
+完成 P2/P3 后，RuleWhisper 仓库按原 `docs/PLAN.md` 继续：
+- **P7 角色卡**：CRUD + Excel 导入解析 + 跑团后导出更新卡（当前 `src/dice/character.py` 仅有内存态，需持久化）。
+- **P8 战斗/追逐**：敏捷排序 → 攻防判定 → 战技/贯穿/伤害结算 → 状态追踪。
+- **P10 生成器**：NPC 工厂、集群生成、场景叙事文本辅助。
+
+---
+
 *创建：2026-07-22 · 关联：`Pan/docs/plans&overviews/RuleWhisper联动与框架优化建议.md`*
